@@ -42,12 +42,12 @@ void controlEvent(ControlEvent theEvent) {
       updateEntry((int(theEvent.getGroup().getValue())));     
     }
 
-    // check if the Event was triggered from a ControlGroup
     println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
-  } else if (  ( theEvent.getController() instanceof Slider) ) {  
   } else if (  ( theEvent.getController() instanceof Toggle) ) {  
-    if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togOnlyActive ) ) ) { 
+    if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togShowOnlyActive ) ) ) { 
       updateToggle((Toggle) theEvent.getController());
+    } else if ( ( theEvent.getController().equals( togNoValue ) )  ) { 
+      updateToggleNoValue();
     }
   }
 
@@ -71,6 +71,15 @@ public void btnWriteMinimal(int theValue) {
 /****************  Cascading update for UI  (Lists)                                        *******/
 /*************************************************************************************************/
 
+
+/*************************************************************************************************/
+public void updateToggleNoValue() {
+  ConfSection cs = g_config.get(drpSection.getId());
+  ConfGroup cg = cs.get(drpGroup.getId());
+  
+  println(" Toggle No Value " +  togNoValue.getState() );
+  cg.setHaveNoValue( togNoValue.getState() );
+}
 
 /*************************************************************************************************/
 public void updateToggle(Toggle aToggle) {
@@ -159,15 +168,14 @@ public void updateGroup(int newId) {
   int id = drpGroup.getId();
   txtGroupComment.setText( "" );
   
-  
   CurrentCEList.clear();
 
   if ( togAll.getState() ) {
-    updateCEList( g_config, togOnlyActive.getState() );
-  } else if ( togOnlyActive.getState() ) {
-    updateCEList( cs, togOnlyActive.getState() );
+    updateCEList( g_config, togShowOnlyActive.getState() );
+  } else if ( togShowOnlyActive.getState() ) {
+    updateCEList( cs, togShowOnlyActive.getState() );
   } else {
-    updateCEList( cg, togOnlyActive.getState() );
+    updateCEList( cg, togShowOnlyActive.getState() );
   }
 
   if ( ! togAll.getState() ) {
@@ -178,10 +186,13 @@ public void updateGroup(int newId) {
       txtGroupComment.setText( cg.getComments() );
     }
   }
-  
-  updatelst( lstEntryName, togOnlyActive.getState(), 0 );
-  updatelst( lstEntryStatus, togOnlyActive.getState(), 1 );
-  updatelst( lstEntryComm, togOnlyActive.getState(), 2 );
+
+  togNoValue.setState( cg.haveNoValue() );
+  togSameName.setState( cg.haveSameName() );
+
+  updatelst( lstEntryName, togShowOnlyActive.getState(), 0 );
+  updatelst( lstEntryStatus, togShowOnlyActive.getState(), 1 );
+  updatelst( lstEntryComm, togShowOnlyActive.getState(), 2 );
   
   if (newId >= 0 ) {
     updateEntry(0);
@@ -584,7 +595,11 @@ public void btnEditSave(int theValue) {
     if ( ! isEditMode ) {
       // Refresh fields from Entry
       // full screen needs refresh probably
-      updateEntry( -1 );
+      if ( isCreateEditor ) {
+        updateEntry( 0 );
+      } else {
+        updateEntry( -1 );
+      }
     }
   } else {
     ConfSection cs = g_config.get(drpSection.getId());
