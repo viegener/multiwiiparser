@@ -1,3 +1,12 @@
+
+
+
+static final String MWP_VERSION = "0.1";
+static final String MWP_REVISION = "2013/03/29"; 
+
+static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
+
+
 /***************** TODO **********************************************************
 - On cancel first entry in list is displayed
 - Test entry changes also with winmerge

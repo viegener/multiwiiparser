@@ -1,5 +1,11 @@
 import controlP5.*;
 
+/*************************************************************************************************/
+/*****************                                                                 ***************/
+/****************  parser and helper                                            *******/
+/*****************                                                                 ***************/
+/*************************************************************************************************/
+
 
 /*********************************************************************************/
 
@@ -36,12 +42,10 @@ static final int DEBUG_PARSER_DETAIL = 2 + 1;
 static final int DEBUG_PARSER_RESULT = 4;
 static final int DEBUG_FIXED_FILE = 8;
 
-static final int debug = DEBUG_FIXED_FILE;
+//static final int debug = DEBUG_FIXED_FILE;
+static final int debug = 0;
 //static final int debug = DEBUG_PARSER_RESULT;
 // static final int debug = DEBUG_PARSER_DETAIL ;
-
-
-
 
 
 boolean isDebug( int level ) {
@@ -370,24 +374,28 @@ void test()  {
 
 
 Config readAConfig( boolean setGlobal ) {
-  Config config;
+  Config config = null;
   
   if ( isDebug( DEBUG_FIXED_FILE ) ) {
+    println("Fixed file");
     g_file = new File("test\\config.h");
   } else {
     g_file = null;
     isFileSelected = false;
     selectInput( "Select a config.h file", "fileSelected" );
-  }
-  
-  while ( ! isFileSelected ) {
-    delay(200);
-  }
 
-  config = parseConfig(g_file.getAbsolutePath() );
+    while ( ! isFileSelected ) {
+      delay(200);
+    }
+
+  }
   
-  if ( setGlobal ) {
-    g_config = config;
+  if ( ! ( g_file == null ) ) {
+    config = parseConfig(g_file.getAbsolutePath() );
+    
+    if ( setGlobal ) {
+      g_config = config;
+    }
   }
   
   return config;
@@ -441,14 +449,19 @@ void fileSelected( File aFile ) {
 
 void setup(){
 
-
 //  test();
 
-  readAConfig( true );
+  frame.setTitle(MULTIWII_PARSER_TITLE_REV);
 
-  initializeGUI();
+  g_config = null;
 
-  println("Ende Setup");
+  if ( readAConfig( true ) == null ) {
+    exit();
+  } else {
+    initializeGUI();
+    println("Ende Setup");
+  }
+
 } // end void setup
 
 
