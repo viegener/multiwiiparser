@@ -123,7 +123,7 @@ Config parseConfig(String filename) {
 
   Config config = new Config(filename);
   
-  config.setRawLines( loadStrings("test/config.h") );
+  config.setRawLines( loadStrings(filename) );
   if ( isDebug( DEBUG_PARSER ) ) {
     println("there are " + config.getRawLineLength() + " lines");
   }

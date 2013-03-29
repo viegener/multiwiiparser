@@ -35,7 +35,7 @@ class ConfObject {
   void add( ConfObject aCE ) {
     // check on addition if a value is in
     if ( mHaveNoValue ) {
-      mHaveNoValue = ! hasValue();
+      mHaveNoValue = ! aCE.hasValue();
     }
     
     // when adding a second entry clarify if all entries are equal or all the same or error
@@ -124,6 +124,10 @@ class ConfObject {
 
   boolean haveNoValue() {
     return mHaveNoValue;
+  }
+
+  void setHaveNoValue(boolean haveNoValue) {
+    mHaveNoValue = haveNoValue;
   }
 
 

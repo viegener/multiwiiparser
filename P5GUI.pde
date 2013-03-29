@@ -36,9 +36,12 @@ SelectListBox lstEntryStatus;
 SelectListBox lstEntryComm;
 
 Toggle togAll;
-Toggle togOnlyActive;
+Toggle togShowOnlyActive;
 
 Toggle togEntryActive;
+
+Toggle togNoValue;
+Toggle togSameName;
 
 Textfield txfName;
 Textfield txfValue;
@@ -186,6 +189,23 @@ public void initializeGUI() {
   lstEntryName.addOthers( arrSLB );
   lstEntryComm.addOthers( arrSLB );
 
+  /******** TOGGLE for Group properties */
+  togNoValue = cp5.addToggle("NO Value")
+     .setPosition(AdditionalXPos,EntryYPos-(pfont_height+4)-40 )
+     .setSize(50,20)
+     .setValue(false)
+     .moveTo( grpSelectors )
+     ;
+
+  togSameName = cp5.addToggle("=Name")
+     .setPosition(AdditionalXPos+togNoValue.getWidth()+20,EntryYPos-(pfont_height+4)-40 )
+     .setSize(50,20)
+     .setValue(false)
+     .lock()
+     .moveTo( grpSelectors )
+     ;
+
+  /******** TOGGLE for Special displays */
   togAll = cp5.addToggle("Show All")
      .setPosition(AdditionalXPos,SectionYPos-(pfont_height+4) )
      .setSize(50,20)
@@ -193,7 +213,7 @@ public void initializeGUI() {
      .moveTo( grpSelectors )
      ;
 
-  togOnlyActive = cp5.addToggle("Only Active")
+  togShowOnlyActive = cp5.addToggle("Only Active")
      .setPosition(AdditionalXPos+togAll.getWidth()+20,SectionYPos -(pfont_height+4))
      .setSize(50,20)
      .setValue(false)
@@ -201,6 +221,7 @@ public void initializeGUI() {
      ;
      
      
+  /*********/
   lblName = cp5.addTextlabel("lblName")
     .setText( "Name" )
     .setPosition( LabelXPos, DetailYPos )
