@@ -38,6 +38,8 @@ Button btnWriteFull;
 
 Button btnEditCancel;
 Button btnEditSave;
+Button btnEditCreate;
+Button btnEditRemove;
 
 ControlGroup grpButtons;
 ControlGroup grpSelectors;
@@ -48,6 +50,8 @@ ControlGroup grpEditor;
 /*************************************************************************************************/
 public void initializeGUI() {
   size(800, 450);
+  frameRate(30); 
+  frame.setTitle(MULTIWII_PARSER_TITLE_REV);
 
   PFont pfont = createFont("Arial",10,true); // use true/false for smooth/no-smooth
   PFont pfontEditor = createFont("Courier",12,true); // use true/false for smooth/no-smooth
@@ -62,7 +66,7 @@ public void initializeGUI() {
 
   int LabelXPos = 11;
   int ControlXPos = 92;
-  int AdditionalXPos = 550;
+  int AdditionalXPos = 630;
 
   int SectionYPos = 15;
   int GroupYPos = 70;
@@ -70,20 +74,19 @@ public void initializeGUI() {
   int DetailYPos = 340;
   int ButtonYPos = 410;
 
-
   /***********/
   
-  dummyLabel = new Label( cp5, "" );
+  dummyLabel = new Label( cp5, "");
+  dummyLabel.hide();
 
   /*********************/
-  grpSelectors = cp5.addGroup( "grpSelectors" );
+  grpSelectors = cp5.addGroup( "" );
 
   /*********************/
 
   txtGroupComment = cp5.addTextarea("txtGroupComment")
                   .setPosition(ControlXPos, GroupYPos+(pfont_height/2))
                   .setSize(405, 50)
-//                  .setColorBackground( 50 )
     .disableColorBackground()
                   .setFont(pfont)
                   .setLineHeight(pfont_height+4)
@@ -94,9 +97,7 @@ public void initializeGUI() {
   grpSubSection = cp5.addTextarea("grpSubSection")
                   .setPosition(ControlXPos, GroupYPos-4*(pfont_height))
                   .setSize(405, 20)
-//                  .setColorBackground( 50 )
     .disableColorBackground()
-
                   .setFont(pfont)
                   .setLineHeight(pfont_height+4)
                   .moveTo( grpSelectors )
@@ -105,8 +106,7 @@ public void initializeGUI() {
   txtEntryComment = cp5.addTextarea("txtEntryComment")
                   .setPosition(ControlXPos, EntryYPos-7*pfont_height)
                   .setSize(405, 5*pfont_height)
-//                  .setColorBackground( 50 )
-    .disableColorBackground()
+                  .disableColorBackground()
                   .setFont(pfont)
                   .setLineHeight(pfont_height+4)
                   .moveTo( grpSelectors )
@@ -226,7 +226,7 @@ public void initializeGUI() {
 
   txfComment = cp5.addTextfield("txfComment")
     .setPosition(ControlXPos, DetailYPos+44)
-    .setSize(650,20)
+    .setSize(670,20)
     .setAutoClear(false)
     .setFont( pfontEditor )
     .lock()
@@ -242,22 +242,34 @@ public void initializeGUI() {
      ;
 
   btnEditCancel = cp5.addButton("btnEditCancel")
-     .setPosition(ControlXPos+btnEditSave.getWidth()+20,ButtonYPos)
+     .setPosition(btnEditSave.getPosition().x+btnEditSave.getWidth()+20,ButtonYPos)
      .setSize(80,20)
      .setCaptionLabel( "   Cancel" )
-     .setVisible(false)
+//     .setVisible(false)
+     ;
+
+  btnEditCreate = cp5.addButton("btnEditCreate")
+     .setPosition(btnEditCancel.getPosition().x+btnEditCancel.getWidth()+30,ButtonYPos)
+     .setSize(80,20)
+     .setCaptionLabel( "   Create" )
+     ;
+
+  btnEditRemove = cp5.addButton("btnEditRemove")
+     .setPosition(btnEditCreate.getPosition().x+btnEditCreate.getWidth()+30,ButtonYPos)
+     .setSize(80,20)
+     .setCaptionLabel( "   Remove" )
      ;
 
   btnWriteFull = cp5.addButton("btnWriteFull")
      .setPosition(AdditionalXPos,ButtonYPos)
-     .setSize(80,20)
-     .setCaptionLabel( "   Write" )
+     .setSize(50,20)
+     .setCaptionLabel( " Write" )
      ;
 
   btnWriteMinimal = cp5.addButton("btnWriteMinimal")
-     .setPosition(AdditionalXPos+btnWriteFull.getWidth()+20,ButtonYPos)
-     .setSize(80,20)
-     .setCaptionLabel( "   Minimal" )
+     .setPosition(AdditionalXPos+btnWriteFull.getWidth()+15,ButtonYPos)
+     .setSize(60,20)
+     .setCaptionLabel( " Minimal" )
      ;
 
   lblEntry = cp5.addTextlabel("lblEntry")
@@ -267,13 +279,13 @@ public void initializeGUI() {
   lblGroup = cp5.addTextlabel("lblGroup")
     .setText( "Group" )
     .setPosition( LabelXPos, GroupYPos-(pfont_height+4) );
-  drpGroup = cp5.addDropdownList("drpGroup", ControlXPos, GroupYPos, 406, 110)
+  drpGroup = cp5.addDropdownList("drpGroup", ControlXPos, GroupYPos, 590, 130)
         .setBarHeight( pfont_height+4 ); 
 
   lblSection = cp5.addTextlabel("lblSection")
     .setText( "Section" )
     .setPosition( LabelXPos, SectionYPos-(pfont_height+4) );
-  drpSection = cp5.addDropdownList("drpSection", ControlXPos, SectionYPos, 406, 70)
+  drpSection = cp5.addDropdownList("drpSection", ControlXPos, SectionYPos, 530, 100)
         .setBarHeight( pfont_height+4 ); 
 
 
@@ -284,8 +296,27 @@ public void initializeGUI() {
   drpSection.setIndex(0);
   updateSection(0);
 
+  // add mousewheel support, now hover the slide with your mouse
+  // and use the mousewheel (or trackpad on a macbook) to change the 
+  // value of the slider.   
+  addMouseWheelListener();
+
+//  grpSelectors.hide();
+
   println("createGUI : End");
 
 }
 
 
+// When working in desktop mode, you can add mousewheel support for 
+// controlP5 by using java.awt.event.MouseWheelListener and 
+// java.awt.event.MouseWheelEvent
+
+void addMouseWheelListener() {
+  frame.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+    public void mouseWheelMoved(java.awt.event.MouseWheelEvent e) {
+      cp5.setMouseWheelRotation(e.getWheelRotation());
+    }
+  }
+  );
+}

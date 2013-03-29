@@ -4,24 +4,17 @@
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
-static final String COMMENT_STARLINE  = "/*************************************************************************************************/";
-static final String COMMENT_STAR2LINE = "/*****************                                                                 ***************/";
-static final int COMMENT_STAR_LEN = 16;
-
-static final String COMMENT_SUBSTARLINE  = "/*************************************************************************************************/";
-static final int COMMENT_SUBSTAR_LEN = 8;
-static final int COMMENT_GROUPSTAR_LEN = 4;
-
 
 /****************  ConfObject            *******/
 class ConfObject {
   String name;
   ArrayList list;
-  String comments = "";
-  boolean isZeroOne = false;
+  protected String comments = "";
+  boolean haveSameName = false;
   boolean isMixed = false;
-  boolean hasNoValue = true;
+  boolean haveNoValue = true;
   Config rootConfig;
+  protected ConfObject parent = null;
 
   int blockStart = -1;
   int blockEnd = -1;
@@ -37,16 +30,16 @@ class ConfObject {
   /************** addEntry ************************/
   void add( ConfObject aCE ) {
     // check on addition if a value is in
-    if ( hasNoValue ) {
-      hasNoValue = ! hasValue();
+    if ( haveNoValue ) {
+      haveNoValue = ! hasValue();
     }
     
     // when adding a second entry clarify if all entries are equal or all the same or error
     if ( list.size() == 1 ) {
-        isZeroOne = ( ((ConfObject) list.get(0)).getName().equals( aCE.getName() ) );
-    } else if ( isZeroOne ) {
+        haveSameName = ( ((ConfObject) list.get(0)).getName().equals( aCE.getName() ) );
+    } else if ( haveSameName ) {
         if ( ! ((ConfObject) list.get(0)).getName().equals( aCE.getName() ) ) {
-          isZeroOne = false;
+          haveSameName = false;
           isMixed = true;
         }
     } else  {
@@ -58,12 +51,30 @@ class ConfObject {
     }   
 
     list.add( aCE );
+    aCE.parent = this;
+  }
+
+  /************** addEntry ************************/
+  ConfObject remove( int i ) {
+
+    // check valid i
+    if ( ( i < 0 ) || ( i >= list.size() ) ) {
+      return null;
+    } 
+
+    println( "remove Object " + i );
+    return (ConfObject) list.remove(i);
   }
 
   /************** size ************************/
   void setBlock(int aStart, int aEnd) {
     blockStart = aStart;
     blockEnd = aEnd;
+  }
+  
+  /************** size ************************/
+  ConfObject getParent() {
+    return parent;
   }
   
 
@@ -405,6 +416,17 @@ class ConfGroup  extends ConfObject {
   }
 
 
+  /************** getFirstActive ************************/
+  ConfEntry getFirstActive() {
+    for (int i = 0 ; i < list.size(); i++) {
+      if ( ((ConfEntry) list.get(i)).active ) {
+         return ((ConfEntry) list.get(i));
+      }
+    }
+  return null;
+  }
+
+
   /************** printIt ************************/
   void printIt() {
     println(">> Group :" + subsectionName + "/" + name + ": (" + list.size() + ")" );
@@ -576,8 +598,8 @@ class Config extends ConfObject {
       for (int j = 0 ; j < cs.list.size(); j++) {
         // ConfGroup
         ConfObject cg = cs.get(j);
-        if ( cg.isZeroOne ) {
-          // Add only one entry for isZeroOne groups
+        if ( cg.haveSameName ) {
+          // Add only one entry for haveSameName groups
           if ( cg.size() > 0 ) {
             addSorted( (ConfEntry) cg.get(0), false );
           }

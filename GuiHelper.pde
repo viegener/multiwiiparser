@@ -7,10 +7,13 @@
 import javax.swing.*;
 
 /* Other Status flags and data */
-ConfEntry actCE;
-ArrayList actCEList = new ArrayList();
+ConfEntry actEditCE;
+
+// Current List shown in the ListBoxes
+ArrayList CurrentCEList = new ArrayList();
 
 boolean isEditMode;
+boolean isCreateEditor = false;
 boolean isUpdateEnabled = true;
 
 /*************************************************************************************************/
@@ -92,6 +95,7 @@ public void updateToggle(Toggle aToggle) {
 
 /*************************************************************************************************/
 /************* newId -1 means just refresh the UI */
+/************* newId -2 means just refresh the UI and do not promote to subsequent controls */
 public void updateSection(int newId) {
   
   if ( ! isUpdateEnabled ) {
@@ -111,6 +115,7 @@ public void updateSection(int newId) {
     drpSection.setId( newId );
   }
 
+  isUpdateEnabled = false;
   ConfSection cs = g_config.get(drpSection.getId());
   drpGroup.setIndex(0);
   drpGroup.clear();  
@@ -119,12 +124,11 @@ public void updateSection(int newId) {
   else
     drpGroup.addItems( dummylist );
   drpGroup.setIndex(0);
-
-  println(" Entries in group :" + cs.size() );
+  isUpdateEnabled = true;
 
   if ( newId >= 0 ) {
     updateGroup(0);
-  } else {
+  } else if ( newId == - 1 ) {
     updateGroup(-1);
   }
 }
@@ -151,12 +155,12 @@ public void updateGroup(int newId) {
 
   ConfSection cs = g_config.get(drpSection.getId());
   ConfGroup cg = cs.get(drpGroup.getId());
-  ConfObject co;
   
   int id = drpGroup.getId();
   txtGroupComment.setText( "" );
   
-  actCEList.clear();
+  
+  CurrentCEList.clear();
 
   if ( togAll.getState() ) {
     updateCEList( g_config, togOnlyActive.getState() );
@@ -181,7 +185,7 @@ public void updateGroup(int newId) {
   
   if (newId >= 0 ) {
     updateEntry(0);
-  } else {
+  } else if ( newId == - 1 ) {
     updateEntry(-1);
   }
 }
@@ -207,37 +211,66 @@ public void updateEntry(int newId) {
     lstEntryName.setId(newId);
     lstEntryName.setActiveValue(newId);
   }
-
-  int actId = lstEntryName.getId();
   
-//  println( "ID: " + lstEntryName.getId() );
-//  println( "Size: " + actCEList.size() );
-  if ( actId >= actCEList.size() ) {
+  ConfEntry aCE = null;
+  
+  int actId = lstEntryName.getId();
+  if ( ( actId >= 0 ) && ( actId < lstEntryName.itemCount() ) ) {
+    aCE = (ConfEntry) CurrentCEList.get(actId);
+    if ( togAll.getState() ) {
+      // If ALl is activted DropDowns must be refreshed based on ACE
+      ConfGroup cg = (ConfGroup) aCE.getParent();
+      ConfSection cs = (ConfSection) cg.getParent();
+
+      isUpdateEnabled = false;
+      for (int j = 0 ; j < g_config.size(); j++) {
+        if ( g_config.get(j).equals( cs ) ) {
+          drpSection.setValue( j );
+        }
+      }
+      isUpdateEnabled = true;
+      updateSection( -2 );
+
+      isUpdateEnabled = false;
+      for (int j = 0 ; j < cs.size(); j++) {
+        if ( cs.get(j).equals( cg ) ) {
+          drpGroup.setValue( j );
+        }
+      }
+      isUpdateEnabled = true;
+      
+    }
+
+  }
+
+  setEditorFieldsFromEntry( aCE );
+}
+
+
+/*************************************************************************************************/
+void setEditorFieldsFromEntry( ConfEntry aCE ) {
+  if ( aCE == null ) {
     txtEntryComment.setText( "" );
     txfName.setText( "" );
     txfValue.setText( "" );
     txfComment.setText( "" );
     togEntryActive.setState( false );
   } else {
-    actCE = (ConfEntry) actCEList.get(actId);
-  
-    if ( actCE.hasComments() ) {
-      txtEntryComment.setText( actCE.comments );
+    if ( aCE.hasComments() ) {
+      txtEntryComment.setText( aCE.comments );
     } else {
       txtEntryComment.setText( "" );
     }
       
-    txfName.setValue( actCE.getName() );
-    if ( actCE.hasValue ) {
-      txfValue.setValue( actCE.getValue() );
+    txfName.setValue( aCE.getName() );
+    if ( aCE.hasValue ) {
+      txfValue.setValue( aCE.getValue() );
     } else {
       txfValue.setValue( "" );
     }
     
-    txfComment.setValue( actCE.getLineComment() );
-
-    togEntryActive.setState( actCE.active );
-
+    txfComment.setValue( aCE.getLineComment() );
+    togEntryActive.setState( aCE.active );
   }
 }
 
@@ -250,7 +283,7 @@ public void updateCEList( ConfObject co, boolean blnActiveOnly ) {
     for (int j = 0 ; j < co.size(); j++) {
       ConfEntry ce = (ConfEntry) co.get(j);
       if ( ( ! blnActiveOnly ) || (ce.active ) ) {
-        actCEList.add ( ce );
+        CurrentCEList.add ( ce );
       }
     }
   } else if ( co instanceof Config ) {
@@ -259,7 +292,7 @@ public void updateCEList( ConfObject co, boolean blnActiveOnly ) {
     for (int j = 0 ; j < con.sortedNames.size(); j++) {
       ConfEntry ce = (ConfEntry) ( con.sortedNames.get(j));
       if ( ( ! blnActiveOnly ) || (ce.active ) ) {
-        actCEList.add ( ce );
+        CurrentCEList.add ( ce );
       }
     }
   } else {
@@ -276,22 +309,12 @@ public void updatelst(SelectListBox lstSel, boolean blnActiveOnly, int which) {
   String[] texts;
   ArrayList textList = new ArrayList();
   
-  for (int j = 0 ; j < actCEList.size(); j++) {
-    ConfEntry ce = (ConfEntry) actCEList.get(j);
-    textList.add( getEntryText( ce, which ) );
-  }
-  
-  // no convert ArrayList into String array
-  texts = (String[]) textList.toArray( new String[] {} );
-  
+
   lstSel.beginItems();
   lstSel.setValue( 0 ).clear();
-
-  // add to list box 
-  if ( texts.length > 0 ) {
-    lstSel.addItems( texts );
-  } else {
-    lstSel.addItems( dummylist );
+  for (int j = 0 ; j < CurrentCEList.size(); j++) {
+    ConfEntry ce = (ConfEntry) CurrentCEList.get(j);
+    lstSel.addItem( getEntryText( ce, which ), j );
   }
 
   lstSel.endItems();
@@ -347,10 +370,14 @@ public boolean isModified() {
     return false;
   }
   
-  if ( actCE.getName().equals( txfName.getText() ) ) {
-    if ( actCE.active == togEntryActive.getState() ) {
-      if ( ( ! actCE.hasValue() ) || ( actCE.value.equals( txfValue.getText() )  ) ) {
-        if ( actCE.getLineComment().equals( txfComment.getText() ) ) {
+  if ( isCreateEditor ) {
+    return true;
+  }
+  
+  if ( actEditCE.getName().equals( txfName.getText() ) ) {
+    if ( actEditCE.active == togEntryActive.getState() ) {
+      if ( ( ! actEditCE.hasValue() ) || ( actEditCE.value.equals( txfValue.getText() )  ) ) {
+        if ( actEditCE.getLineComment().equals( txfComment.getText() ) ) {
           return false;
         }
       }
@@ -365,10 +392,10 @@ public boolean isModified() {
 public String validateEntry(String name, String value, String comment, boolean active) {
   ConfSection cs = g_config.get(drpSection.getId());
   ConfGroup cg = cs.get(drpGroup.getId());
-  ConfEntry ce = cg.get(lstEntryName.getId());
+  ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
 
-  // If newly activeated then check for ZERO-ONE
-  if ( ( cg.isZeroOne ) && ( active ) ){
+  // If newly activeated then check for haveSameName
+  if ( ( cg.haveSameName ) && ( active ) ){
     for( int i = 0; i<cg.size(); i++ ) {
       ConfEntry ance = (ConfEntry) cg.get(i);
       if ( ( ance.active ) && ( ! ance.equals( ce ) ) ) {
@@ -387,12 +414,12 @@ public String validateEntry(String name, String value, String comment, boolean a
     }
   }
 
-  // If hasNoValue (meaning all entries only defines) I assume this is a toggle group where only one entry should be active  
-  if ( ( cg.hasNoValue ) && ( active ) ){
+  // If haveNoValue (meaning all entries only defines) I assume this is a toggle group where only one entry should be active  
+  if ( ( cg.haveNoValue ) && ( active ) ){
     for( int i = 0; i<cg.size(); i++ ) {
       ConfEntry ance = (ConfEntry) cg.get(i);
       if ( ( ance.active ) && ( ! ance.equals( ce ) ) ) {
-        return "Multiple active entries in HasNoValue group - Deactive other entry first";
+        return "Multiple active entries in haveNoValue group - Deactive other entry first";
       }
     }
   }
@@ -448,33 +475,24 @@ public boolean changeEntryfromForm() {
   }
     
   // Change entry
-  actCE.modified = true;
-  actCE.active =  active;
-  actCE.name =  name;
-  actCE.value =  value;
-  actCE.setLineComment( comment );
+  actEditCE.modified = true;
+  actEditCE.active =  active;
+  actEditCE.name =  name;
+  actEditCE.value =  value;
+  actEditCE.setLineComment( comment );
+
+  // on Create new entry needs to be added
+  if ( isCreateEditor ) {
+    ConfSection cs = g_config.get(drpSection.getId());
+    ConfGroup cg = cs.get(drpGroup.getId());
+    cg.add(actEditCE );
+  }
+
   g_config.rebuild();
   
   // updateEntry
   updateGroup( -1 );
 
-  // update current Entry (actCE)
-  // ?? update and validation --> return false if validation does not work
-/*
-    * Activate an entry --> Toggle active
-      Validate: Check if ZeroOne or if entry is there multiple times => Invalidate other entry and change ref in sortedarray
-      Validate: Check if HasNoValue and show message to deactivate the other sets
-    * Deactivate an entry --> Toglle active
-    * Add a new entry
-      Validate: Check name available in other group => Fail
-          Check name active in this group and not a 
-    * Remove an entry
-    * Change Value for an entry
-      Validate: Check the value on syntax?
-    * Rename an entry?
-    
-    * check for isSingleLineComment
-*/
   return true;
 }
 
@@ -516,29 +534,42 @@ public void finalizeEdit(boolean doSave) {
     isEditMode = false;
     btnEditSave.setCaptionLabel( "   Edit" );
     btnEditCancel.setVisible( false );
+
+    btnEditCreate.setVisible( true );
+    btnEditRemove.setVisible( true );
+
+
   }
 }
 
 /*************************************************************************************************/
-public void startEdit() {
+public void startEdit(boolean blnWithName, boolean blnWithValue, boolean blnWithComment, boolean blnWithActive) {
   // modify UI for starting edit
 
   // set color for active fields
-  txfName.setColor( ControlP5.RED );
-  txfName.unlock();
-  if ( actCE.hasValue() ) {
+  if ( blnWithName ) {
+    txfName.setColor( ControlP5.RED );
+    txfName.unlock();
+  }
+  if ( blnWithValue ) {
     txfValue.setColor( ControlP5.RED );
     txfValue.unlock();
   }
-  txfComment.unlock();
-  txfComment.setColor( ControlP5.RED );
-
-  togEntryActive.setColor( ControlP5.RED );
-  togEntryActive.unlock();
+  if ( blnWithComment ) {
+    txfComment.unlock();
+    txfComment.setColor( ControlP5.RED );
+  }
+  
+  if ( blnWithActive ) {
+    togEntryActive.setColor( ControlP5.RED );
+    togEntryActive.unlock();
+  }
   
   btnEditCancel.setColor( ControlP5.RED );
   btnEditSave.setColor( ControlP5.RED );
 
+  btnEditCreate.setVisible( false );
+  btnEditRemove.setVisible( false );
 
   isEditMode = true;
   btnEditSave.setCaptionLabel( "   Save" );
@@ -556,7 +587,24 @@ public void btnEditSave(int theValue) {
       updateEntry( -1 );
     }
   } else {
-    startEdit();
+    ConfSection cs = g_config.get(drpSection.getId());
+    ConfGroup cg = cs.get(drpGroup.getId());
+    ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
+    
+    boolean blnWithName =  ! cg.haveSameName ;
+    boolean blnWithActive = true;
+
+    if ( cg.haveNoValue ) {
+      ConfEntry activeCE = cg.getFirstActive();
+      if ( activeCE != null )
+        if ( ! ( activeCE.equals( ce ) ) ) {
+          blnWithActive = false;
+        }    
+    }
+
+    isCreateEditor = false;
+    actEditCE = ce;
+    startEdit(blnWithName, (ce.hasValue()), true, blnWithActive);
   }
 }
 
@@ -571,3 +619,86 @@ public void btnEditCancel(int theValue) {
   }
 }
 
+
+/*************************************************************************************************/
+public void btnEditCreate(int theValue) {
+  // Create in haveSameName --> Means: Can not be active if another active entry is existing / name is fixed to group name
+  // create in haveNoValue --> Means: Can not be active if another active entry is existing / no value
+  // create in mixed --> Active and duplicate name in group is not possible
+
+  ConfSection cs = g_config.get(drpSection.getId());
+  ConfGroup cg = cs.get(drpGroup.getId());
+  ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
+  
+  boolean blnWithName =  ! cg.haveSameName ;
+  boolean blnWithActive = true;
+  boolean blnWithValue = ! cg.haveNoValue;
+
+  if ( cg.haveNoValue ) {
+    ConfEntry activeCE = cg.getFirstActive();
+    if ( activeCE != null )
+      if ( ! ( activeCE.equals( ce ) ) ) {
+        blnWithActive = false;
+      }    
+  }
+
+  String dummyLine = "    ";
+  if ( ! blnWithActive ) {
+    dummyLine += "//";
+  }
+  dummyLine += SL_SETTING;
+  if ( cg.haveSameName ) {
+    dummyLine += ce.getName();
+  } else {
+    dummyLine += DUMMY_NAME;
+  }
+  actEditCE = new ConfEntry(g_config, dummyLine);
+  setEditorFieldsFromEntry( actEditCE );
+
+  isCreateEditor = true;
+  startEdit(blnWithName, blnWithValue, true, blnWithActive);
+}
+
+
+/*************************************************************************************************/
+public void btnEditRemove(int theValue) {
+  ConfSection cs = g_config.get(drpSection.getId());
+  ConfGroup cg = cs.get(drpGroup.getId());
+  ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
+  boolean groupDel = false;
+
+
+  // Check if entry can be deleted
+  if ( ( cg.size() == 1 ) && ( cs.size() == 1 ) ) {
+    JOptionPane.showMessageDialog(null,
+        "Last entry in Section can not be removed !", "Remove Entry", 
+        JOptionPane.ERROR_MESSAGE);
+    return;
+  }
+  
+  // Ask for confirmation
+  int choice = JOptionPane.showConfirmDialog(null,
+      "Are you sure you want to delete the current entry (\"" + ce.getName() + "\") ?", "Remove Entry", 
+      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+  if ( ( choice == JOptionPane.CANCEL_OPTION ) || ( choice == JOptionPane.NO_OPTION ) ) { 
+    return;
+  }
+
+  // Remove ce from cg
+  cg.remove( lstEntryName.getId() );
+  
+  // check if group is empty and needs to be deleted as well
+  if ( cg.size() == 0 ) {
+    groupDel = true;
+    cs.remove(drpGroup.getId());
+  }
+  
+  // rebuild list
+  g_config.rebuild();
+
+  // refresh
+  if ( groupDel )
+    updateSection( drpSection.getId() );
+  else 
+    updateGroup( drpGroup.getId() );
+}  

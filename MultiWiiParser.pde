@@ -1,10 +1,10 @@
-import controlP5.*;
-
 /*************************************************************************************************/
 /*****************                                                                 ***************/
 /****************  parser and helper                                            *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
+
+import controlP5.*;
 
 
 /*********************************************************************************/
@@ -23,12 +23,24 @@ static final String SL_SETTING ="#define ";
 
 /*********************************************************************************/
 
+static final String COMMENT_STARLINE  = "/*************************************************************************************************/";
+static final String COMMENT_STAR2LINE = "/*****************                                                                 ***************/";
+static final int COMMENT_STAR_LEN = 16;
+
+static final String COMMENT_SUBSTARLINE  = "/*************************************************************************************************/";
+static final int COMMENT_SUBSTAR_LEN = 8;
+static final int COMMENT_GROUPSTAR_LEN = 4;
+
+
+static final String DUMMY_NAME = "new";
+
+/*********************************************************************************/
+
 Config g_config;
 File g_file;
+boolean isFileSelected;
 
 String[] dummylist = { "---" };
-
-boolean isFileSelected;
 
 /*************************************************************************************************/
 /*****************                                                                 ***************/
@@ -43,7 +55,7 @@ static final int DEBUG_PARSER_RESULT = 4;
 static final int DEBUG_FIXED_FILE = 8;
 
 //static final int debug = DEBUG_FIXED_FILE;
-static final int debug = 0;
+static final int debug = 0 ;
 //static final int debug = DEBUG_PARSER_RESULT;
 // static final int debug = DEBUG_PARSER_DETAIL ;
 
@@ -450,8 +462,6 @@ void fileSelected( File aFile ) {
 void setup(){
 
 //  test();
-
-  frame.setTitle(MULTIWII_PARSER_TITLE_REV);
 
   g_config = null;
 

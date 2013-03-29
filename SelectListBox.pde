@@ -37,6 +37,11 @@ public class SelectListBox extends ListBox {
   }
 
 
+  public int itemCount() {
+    return items.size();
+  }
+
+
   public SelectListBox setActiveValue( float actValue ) {
     for (int i = 0; i < items.size(); i++) {
       if ( (items.get(i)).getValue() == _myActiveValue ) {

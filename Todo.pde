@@ -8,23 +8,12 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 
 
 /***************** TODO **********************************************************
-- On cancel first entry in list is displayed
-- Test entry changes also with winmerge
+- DEFECT: DropDown texts might be too long and need to be cutted
 
-- code.google - GIT - MultiWiiParser
-- Change entries
+- haveNoValue and haveSameName should be shown as toggles next to Group list
+- haveNoValue and haveSameName to be overwritten by user 
+- In dropdownlistbox active entry should be marked and rest of th elist should be grey (as in List)
 
-* USECASE 2 - Select a config file and edit it 
-    Plus USECASE 1
-    -- Add EDIT/CANCEL Button for unlock entry
-    -- TODO: Add create button
-    -- Set a configuration active/non-active
-    -- Edit a config value
-    -- TODO: remove a config value
-    -- TODO: add a config value
-    -- Check activation is not creating incompleteness
-    -- If entries are changed and cancel / new selection ==> Ask for Save or Cancel
-    
 * USECASE 3 - Open two different config.h and show the differences
     -- TODO: Show the delta
   
@@ -41,33 +30,35 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
     
 --------------------------------
 
-- event bound to debug setting
-- Add java doc
+- TextField should allow Pos1/End
+- TextField should allow Copy/Paste
+- event output bound to debug setting
+- Add javadoc
 - Allow search for entries
-- show count of entries in label for droplist
-- handle (*) in entry comment (needs reset gui since it is stored in eprom)
+- Cleanup visibility in Conf* Classes 
+
+
+---- NICE TO HAVE ------
 - handle complex defines ( parametereized values)
+- Allow resorting of entries in a group
+- show count of entries in label for droplist
+- Background of drop down should be blanked and not shine through
 
------------------------------------
-
-* USECASE 1 - Select a config file and show it
-    -- Select config file
-    -- show alphabetically all setting
-    -- show the settings grouped
-    -- Show one group in a Listbox with the details
-    -- Show only active settings
-    -- Select output file
-    -- write minimal settings to a config.
-    -- write a mostly complete config file
-
--------------------------------------
-
-
+=======================================================================================
 DONE:
 29.3.2013
+- remove a config value
 - Validate name to avoid duplicates
 - Rename from ParseConfig to MultiWiiParser
 - Debug entry (FIXED_FILE) for fixed file
+- code.google - GIT - MultiWiiParser
+- Allow editing of name only if this is not a toggle group (HaveSameName)
+- Allow editing of active only if no other active entries present
+- create an entry and store it in current group
+- added mouseWheelListeneer according to example from ControlP5 (only works in ListBox but without adapting scrollbar)
+- Adapt lengths of dropBox
+- DEFECT: In ShowAll mode still access to grouplist is done while refreshing screen leading to index-exceptions
+- DEFECT: in Position 0,0 seems to be some output of an unknown control -> Coming from grpSelector name
 
 28.3.2013
 - MOdify colors for Edit fields when inactive --> Grey
@@ -139,6 +130,37 @@ DONE:
 - Add generic base class for Config
 - handle comments on any element
 - show comments
+
+================================================================================
+
+* USECASE 1 - Select a config file and show it
+    -- Select config file
+    -- show alphabetically all setting
+    -- show the settings grouped
+    -- Show one group in a Listbox with the details
+    -- Show only active settings
+    -- Select output file
+    -- write minimal settings to a config.
+    -- write a mostly complete config file
+
+* USECASE 2 - Select a config file and edit it 
+    Plus USECASE 1
+    -- Add EDIT/CANCEL Button for unlock entry
+    -- Add create/remove button
+    -- Set a configuration active/non-active
+    -- Edit a config value
+    -- remove a config value
+    -- add a config value
+    -- Check activation is not creating incompleteness
+    -- If entries are changed and cancel / new selection ==> Ask for Save or Cancel
+    
+-------------------------------------
+
+
+
+
+
+
 
 /*********************************************************************************/
 
