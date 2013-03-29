@@ -1,3 +1,15 @@
+/*************************************************************************************************/
+/*****************                                                                 ***************/
+/****************  P5GUI only init                                                         *******/
+/*****************                                                                 ***************/
+/*************************************************************************************************/
+
+
+import controlP5.*;
+
+/*************************************************************************************************/
+/****************  All Controls are currently Global                                       *******/
+/*************************************************************************************************/
 
 ControlP5 cp5;
 
@@ -48,6 +60,9 @@ ControlGroup grpEditor;
 
 
 /*************************************************************************************************/
+/****************  Create the GUI during setup()                                           *******/
+/*************************************************************************************************/
+
 public void initializeGUI() {
   size(800, 450);
   frameRate(30); 
@@ -231,9 +246,6 @@ public void initializeGUI() {
     .setFont( pfontEditor )
     .lock()
     ;
-    
-
-
 
   btnEditSave = cp5.addButton("btnEditSave")
      .setPosition(ControlXPos,ButtonYPos)
@@ -245,7 +257,7 @@ public void initializeGUI() {
      .setPosition(btnEditSave.getPosition().x+btnEditSave.getWidth()+20,ButtonYPos)
      .setSize(80,20)
      .setCaptionLabel( "   Cancel" )
-//     .setVisible(false)
+     .setVisible(false)
      ;
 
   btnEditCreate = cp5.addButton("btnEditCreate")

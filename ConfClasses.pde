@@ -1,103 +1,131 @@
 /*************************************************************************************************/
 /*****************                                                                 ***************/
-/****************  def conf classes                                            *******/
+/****************  Conf* classes                                                           *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
 
-/****************  ConfObject            *******/
+/*************************************************************************************************/
+/**************** ConfObject                                                               *******/
+/*************************************************************************************************/
 class ConfObject {
-  String name;
-  ArrayList list;
-  protected String comments = "";
-  boolean haveSameName = false;
-  boolean isMixed = false;
-  boolean haveNoValue = true;
-  Config rootConfig;
-  protected ConfObject parent = null;
+  protected String mName;
+  protected ArrayList mList;
+  protected String mComments = "";
+  protected Config mRootConfig;
+  protected ConfObject mParentConfObject = null;
 
-  int blockStart = -1;
-  int blockEnd = -1;
+  protected int mBlockStart = -1;
+  protected int mBlockEnd = -1;
 
-  boolean modified = false;
+  protected boolean mIsModified = false;
 
+  protected boolean mHaveSameName = false;
+  protected boolean mIsMixed = false;
+  protected boolean mHaveNoValue = true;
+
+  /************** ConfObject ************************/
   ConfObject( Config aConfig, String aName ) {
-    rootConfig = aConfig;
-    name = aName;
-    list = new ArrayList();
+    mRootConfig = aConfig;
+    mName = aName;
+    mList = new ArrayList();
   }
 
-  /************** addEntry ************************/
+  /************** add ************************/
   void add( ConfObject aCE ) {
     // check on addition if a value is in
-    if ( haveNoValue ) {
-      haveNoValue = ! hasValue();
+    if ( mHaveNoValue ) {
+      mHaveNoValue = ! hasValue();
     }
     
     // when adding a second entry clarify if all entries are equal or all the same or error
-    if ( list.size() == 1 ) {
-        haveSameName = ( ((ConfObject) list.get(0)).getName().equals( aCE.getName() ) );
-    } else if ( haveSameName ) {
-        if ( ! ((ConfObject) list.get(0)).getName().equals( aCE.getName() ) ) {
-          haveSameName = false;
-          isMixed = true;
+    if ( mList.size() == 1 ) {
+        mHaveSameName = ( ((ConfObject) mList.get(0)).getName().equals( aCE.getName() ) );
+    } else if ( mHaveSameName ) {
+        if ( ! ((ConfObject) mList.get(0)).getName().equals( aCE.getName() ) ) {
+          mHaveSameName = false;
+          mIsMixed = true;
         }
     } else  {
-      for (int i = 0 ; i < list.size(); i++) {
-        if ( ((ConfObject) list.get(i)).getName().equals( aCE.getName() ) ) {   
-          isMixed = true;
+      for (int i = 0 ; i < mList.size(); i++) {
+        if ( ((ConfObject) mList.get(i)).getName().equals( aCE.getName() ) ) {   
+          mIsMixed = true;
         }
       }
     }   
 
-    list.add( aCE );
-    aCE.parent = this;
+    mList.add( aCE );
+    aCE.mParentConfObject = this;
   }
 
-  /************** addEntry ************************/
+  /************** remove ************************/
   ConfObject remove( int i ) {
 
     // check valid i
-    if ( ( i < 0 ) || ( i >= list.size() ) ) {
+    if ( ( i < 0 ) || ( i >= mList.size() ) ) {
       return null;
     } 
 
     println( "remove Object " + i );
-    return (ConfObject) list.remove(i);
+    return (ConfObject) mList.remove(i);
   }
 
-  /************** size ************************/
+  /************** setBlock ************************/
   void setBlock(int aStart, int aEnd) {
-    blockStart = aStart;
-    blockEnd = aEnd;
+    mBlockStart = aStart;
+    mBlockEnd = aEnd;
   }
   
-  /************** size ************************/
+  /************** getmParent ************************/
   ConfObject getParent() {
-    return parent;
+    return mParentConfObject;
   }
-  
-
 
   /************** size ************************/
   int size() {
-    return list.size();
+    return mList.size();
   }
   
-  /************** addEntry ************************/
+  /************** get ************************/
   ConfObject get( int i ) {
-    return (ConfObject) list.get(i);
+    return (ConfObject) mList.get(i);
   }
   
     /************** getName ************************/
   String getName() {
-    return name;
+    return mName;
   }
 
-  /************** getName ************************/
-  String getDisplayName() {
-    return name;
+    /************** getName ************************/
+  void setName(String aName) {
+    mName = aName;
   }
+
+  /************** getDisplayName ************************/
+  String getDisplayName() {
+    return mName;
+  }
+
+  boolean isMixed() {
+    return mIsMixed;
+  }
+
+  boolean isModified() {
+    return mIsModified;
+  }
+
+  void setModified(boolean aIsModified) {
+    mIsModified = aIsModified;
+  }
+
+  boolean haveSameName() {
+    return mHaveSameName;
+  }
+
+  boolean haveNoValue() {
+    return mHaveNoValue;
+  }
+
 
   /************** hasValue ************************/
   boolean hasValue() {
@@ -106,63 +134,71 @@ class ConfObject {
 
   /************** addComment ************************/
   void addComment( String aComment ) {
-    if ( comments.length() > 0 ) {
-      comments += char(10);
+    if ( mComments.length() > 0 ) {
+      mComments += char(10);
     }
-    comments += aComment;
+    mComments += aComment;
+  }
+
+  /************** addComment ************************/
+  String getComments() {
+    return mComments;
   }
 
   /************** hasComments ************************/
   boolean hasComments() {
-    return (comments.length() > 0);
+    return (mComments.length() > 0);
   }
 
   /************** getDisplayNames ************************/
   String[] getDisplayNames() {
     String[] names;
     
-    names = new String[ list.size() ];
-    for (int i = 0 ; i < list.size(); i++) {
-      names[i] = ((ConfObject) list.get(i)).getDisplayName();
+    names = new String[ mList.size() ];
+    for (int i = 0 ; i < mList.size(); i++) {
+      names[i] = ((ConfObject) mList.get(i)).getDisplayName();
     }
     return names;
   }
 
   /************** appendOriginalText ************************/
   void  appendOriginalText(ArrayList al) {
-    if ( blockStart != -1 ) {
-      int j = blockStart;
-      if ( modified ) {
-        while ( j <= (blockEnd-1) ) {
-          al.add( rootConfig.lines[j] );
+    if ( mBlockStart != -1 ) {
+      int j = mBlockStart;
+      if ( mIsModified ) {
+        while ( j <= (mBlockEnd-1) ) {
+          al.add( mRootConfig.mRawLines[j] );
           j++;
         }
         ConfEntry ce = (ConfEntry) this;
         al.add( ce.getEntryLine(false) );
       } else {
-        while ( j <= blockEnd ) {
-          al.add( rootConfig.lines[j] );
+        while ( j <= mBlockEnd ) {
+          al.add( mRootConfig.mRawLines[j] );
           j++;
         }
       }
     }
     
-    for (int i = 0 ; i < list.size(); i++) {
-      ConfObject co = (ConfObject) list.get(i);
+    for (int i = 0 ; i < mList.size(); i++) {
+      ConfObject co = (ConfObject) mList.get(i);
       co.appendOriginalText( al );
     }
   }
 }
 
 
-/****************  ConfEntry            *******/
+/*************************************************************************************************/
+/**************** ConfEntry                                                                *******/
+/*************************************************************************************************/
 class ConfEntry extends ConfObject {
-  String value;
-  String rawText;
-  boolean hasValue;
-  boolean active;
-  boolean inEEPROM;
-  int idxComment;
+  protected String mValue;
+  protected String mRawText;
+
+  protected boolean mHasValue;
+  protected boolean mIsActive;
+  protected boolean mIsInEEPROM;
+  protected int mIdxComment;
 
   
   /************** ConfEntry ************************/
@@ -171,13 +207,13 @@ class ConfEntry extends ConfObject {
 
     int addIdx = 0;
 
-    rawText = aLine;
+    mRawText = aLine;
 
     // set COnfEntry from line
-    String baseline = rawText.trim();
+    String baseline = mRawText.trim();
     
-    active = ! startsWith( baseline, "//" );    
-    if (  ! active ) {
+    mIsActive = ! startsWith( baseline, "//" );    
+    if (  ! mIsActive ) {
       addIdx += baseline.length();
       baseline = baseline.substring( 2 ).trim();
       addIdx -= baseline.length();
@@ -202,7 +238,7 @@ class ConfEntry extends ConfObject {
     }
 
     // set name
-    name = baseline.substring(0, idx);
+    mName = baseline.substring(0, idx);
 
     // remove name
     addIdx += baseline.length();
@@ -213,7 +249,7 @@ class ConfEntry extends ConfObject {
       println("3 :" + baseline + ":" );
     
     stripCommentsToValue(baseline, addIdx);
-    hasValue = value.length() > 0 ;
+    mHasValue = mValue.length() > 0 ;
   }
 
   /************** stripCommentsToValue ************************/
@@ -265,75 +301,89 @@ class ConfEntry extends ConfObject {
     
     if ( limit == -1 ) {
       limit = idx;
-      idxComment = 0;            
+      mIdxComment = 0;            
     } else {
-       idxComment = limit + addIdx;
+       mIdxComment = limit + addIdx;
     }   
     
-    value = aLine.substring(0, limit ).trim();
+    mValue = aLine.substring(0, limit ).trim();
     
-    inEEPROM = (aLine.substring( limit ).indexOf("(*)") != -1);
+    mIsInEEPROM = (aLine.substring( limit ).indexOf("(*)") != -1);
 
   }
   
+  /************** Active ************************/
+  boolean isActive() {
+    return mIsActive;
+  }
+
+  void setActive(boolean active) {
+    mIsActive = active;
+  }
+
+
+
   /************** printIt ************************/
   void printIt() {
     print(">> Entry");
-    if ( active ) 
+    if ( mIsActive ) 
       print(" A ");
     else
       print(" - ");
 
-    print(":" + name + ":");
+    print(":" + mName + ":");
    
-    if ( hasValue ) 
-      print(" = :" + value + ":" );
+    if ( mHasValue ) 
+      print(" = :" + mValue + ":" );
     println();
   }
 
   /************** getDisplayName ************************/
   String getDisplayName() {
     String text = "";
-    if ( active )
+    if ( mIsActive )
       text = "* ";
       
-    text += name; 
+    text += mName; 
 
-    if ( hasValue ) 
-      text += " = `" + value + "´" ;
+    if ( mHasValue ) 
+      text += " = `" + mValue + "´" ;
     return text;
   }
 
-  /************** hasValue ************************/
+  /************** Value ************************/
   boolean hasValue() {
-    return (value.length() > 0);
+    return (mValue.length() > 0);
   }
 
-  /************** getValue ************************/
   String getValue() {
-    return value;
+    return mValue;
+  }
+  
+  void setValue(String aValue) {
+    mValue  = aValue;
   }
   
   /************** getStatusText ************************/
   String getStatusText() {
     String text = " ";
     
-    if ( active ) 
+    if ( mIsActive ) 
       text += "Act  ";
     else
       text += "         ";
       
-    if ( inEEPROM ) 
+    if ( mIsInEEPROM ) 
       text += "EE  ";
     else
       text += "       ";
       
-    if ( hasValue ) 
+    if ( mHasValue ) 
       text += "Val  ";
     else
       text += "         ";
       
-    if ( idxComment > 0 ) 
+    if ( mIdxComment > 0 ) 
       text += "//  ";
     else
       text += "    ";
@@ -344,8 +394,8 @@ class ConfEntry extends ConfObject {
 
   /************** getLineComment ************************/
   String getLineComment() {
-    if ( idxComment > 0 ) { 
-      return rawText.substring( idxComment );
+    if ( mIdxComment > 0 ) { 
+      return mRawText.substring( mIdxComment );
     }
     return "";
   }
@@ -353,14 +403,14 @@ class ConfEntry extends ConfObject {
 
   /************** getLineComment ************************/
   void setLineComment(String strComment) {
-    if ( idxComment > 0 ) {
-      rawText = rawText.substring(0,idxComment);
-      idxComment = 0;
+    if ( mIdxComment > 0 ) {
+      mRawText = mRawText.substring(0,mIdxComment);
+      mIdxComment = 0;
     }
 
     if ( strComment.length() > 0 ) {
-      idxComment = rawText.length();
-      rawText += strComment;
+      mIdxComment = mRawText.length();
+      mRawText += strComment;
     } 
   }
 
@@ -371,12 +421,12 @@ class ConfEntry extends ConfObject {
     if ( ! doMinimal ) {
       text += "  ";
     }  
-    if ( !active ) {
+    if ( !mIsActive ) {
       text += "//";
     }
-    text += "#define "+name + " ";
-    if ( hasValue ) { 
-      text += value;
+    text += "#define "+mName + " ";
+    if ( mHasValue ) { 
+      text += mValue;
     }
     if ( ! doMinimal ) {
       text += " " + getLineComment();
@@ -387,11 +437,11 @@ class ConfEntry extends ConfObject {
 
   /************** appendOutput ************************/
   void  appendOutput(ArrayList al, boolean doMinimal) {
-    if ( ( ! doMinimal ) || ( active ) ) {
+    if ( ( ! doMinimal ) || ( mIsActive ) ) {
       al.add( getEntryLine(doMinimal) );
       if ( ! doMinimal ) {
         if ( hasComments() ) {
-          al.add( "    " + comments );
+          al.add( "    " + mComments );
         }
       }
 
@@ -399,28 +449,29 @@ class ConfEntry extends ConfObject {
   }
 }  
   
-/***********************************************/
-/****************  ConfGroup            *******/
+/*************************************************************************************************/
+/**************** ConfGroup                                                                *******/
+/*************************************************************************************************/
 class ConfGroup  extends ConfObject {
-  String subsectionName;
+  protected String mSubsectionName;
     
   /************** Constructor ************************/
   ConfGroup( Config aConfig, String aSubsName, String aName) {
     super( aConfig, aName );
-    subsectionName = aSubsName;
+    mSubsectionName = aSubsName;
   }
 
   /************** get ************************/
   ConfEntry get( int i ) {
-    return (ConfEntry) list.get( i );
+    return (ConfEntry) mList.get( i );
   }
 
 
   /************** getFirstActive ************************/
   ConfEntry getFirstActive() {
-    for (int i = 0 ; i < list.size(); i++) {
-      if ( ((ConfEntry) list.get(i)).active ) {
-         return ((ConfEntry) list.get(i));
+    for (int i = 0 ; i < mList.size(); i++) {
+      if ( ((ConfEntry) mList.get(i)).isActive() ) {
+         return ((ConfEntry) mList.get(i));
       }
     }
   return null;
@@ -429,35 +480,35 @@ class ConfGroup  extends ConfObject {
 
   /************** printIt ************************/
   void printIt() {
-    println(">> Group :" + subsectionName + "/" + name + ": (" + list.size() + ")" );
-    for (int i = 0 ; i < list.size(); i++) {
+    println(">> Group :" + mSubsectionName + "/" + mName + ": (" + mList.size() + ")" );
+    for (int i = 0 ; i < mList.size(); i++) {
       print( "  " );
-      ((ConfEntry) list.get(i)).printIt();
+      ((ConfEntry) mList.get(i)).printIt();
     }
   }
 
 
   /************** getName ************************/
   String getDisplayName() {
-      String longName = name;
-      if ( subsectionName.length() > 0 ) {
-        longName += "(" + subsectionName + ")";
+      String longName = mName;
+      if ( mSubsectionName.length() > 0 ) {
+        longName += "(" + mSubsectionName + ")";
       }
       return longName;
   }
 
   /************** getName ************************/
   String getSubsectionName() {
-      return subsectionName;
+      return mSubsectionName;
   }
 
   /************** getDisplayNames ************************/
   String[] getStatusTexts() {
     String[] texts;
     
-    texts = new String[ list.size() ];
-    for (int i = 0 ; i < list.size(); i++) {
-      texts[i] = ((ConfEntry) list.get(i)).getStatusText();
+    texts = new String[ mList.size() ];
+    for (int i = 0 ; i < mList.size(); i++) {
+      texts[i] = ((ConfEntry) mList.get(i)).getStatusText();
     }
     return texts;
   }
@@ -467,24 +518,25 @@ class ConfGroup  extends ConfObject {
 
     String[] texts;
     
-    texts = new String[ list.size() ];
-    for (int i = 0 ; i < list.size(); i++) {
-      texts[i] = ((ConfEntry) list.get(i)).getLineComment();
+    texts = new String[ mList.size() ];
+    for (int i = 0 ; i < mList.size(); i++) {
+      texts[i] = ((ConfEntry) mList.get(i)).getLineComment();
     }
     return texts;
   }
 
   /************** appendOutput ************************/
   void  appendOutput(ArrayList al, boolean doMinimal) {
-    for (int i = 0 ; i < list.size(); i++) {
-      ((ConfEntry) list.get(i)).appendOutput( al, doMinimal );
+    for (int i = 0 ; i < mList.size(); i++) {
+      ((ConfEntry) mList.get(i)).appendOutput( al, doMinimal );
     }
   }
 }  
 
 
-/***********************************************/
-/****************  ConfSection            *******/
+/*************************************************************************************************/
+/**************** ConfSection                                                              *******/
+/*************************************************************************************************/
 class ConfSection  extends ConfObject {
   /************** Constructor ************************/
   ConfSection( Config aConfig, String aName) {
@@ -493,17 +545,17 @@ class ConfSection  extends ConfObject {
   
   /************** get ************************/
   ConfGroup get( int i ) {
-    return (ConfGroup) list.get( i );
+    return (ConfGroup) mList.get( i );
   }
 
   /************** printIt ************************/
   void printIt() {
     println();
-    println("*** SECTION :" + name + ": (" + list.size() + ")");
+    println("*** SECTION :" + mName + ": (" + mList.size() + ")");
     println();
 
-    for (int i = 0 ; i < list.size(); i++) {
-      ((ConfGroup) list.get(i)).printIt();
+    for (int i = 0 ; i < mList.size(); i++) {
+      ((ConfGroup) mList.get(i)).printIt();
     }
     println();
 
@@ -513,8 +565,8 @@ class ConfSection  extends ConfObject {
   void  appendOutput(ArrayList al, boolean doMinimal) {
     String lastSub = "";
     
-    for (int i = 0 ; i < list.size(); i++) {
-      ConfGroup cg = (ConfGroup) list.get(i);
+    for (int i = 0 ; i < mList.size(); i++) {
+      ConfGroup cg = (ConfGroup) mList.get(i);
 
       if ( ! doMinimal ) {
         String text;
@@ -547,7 +599,7 @@ class ConfSection  extends ConfObject {
         al.add( "    " + text );
         
         if ( hasComments() ) {
-          al.add( "    " + comments );
+          al.add( "    " + mComments );
         }
       }
       cg.appendOutput( al, doMinimal );
@@ -558,30 +610,54 @@ class ConfSection  extends ConfObject {
 
 
 
-
-
-/****************  Config            *******/
+/*************************************************************************************************/
+/**************** Config                                                                   *******/
+/*************************************************************************************************/
 class Config extends ConfObject {
-  ArrayList sortedNames;
-  String[] lines;
+  protected ArrayList mSortedNames;
+  protected String[] mRawLines;
 
   /************** Constructor ************************/
   Config(String aFilename) {
     super( null, aFilename );
-    sortedNames = new ArrayList();
+    mSortedNames = new ArrayList();
+  }
+  
+  /************** SortedNames ************************/
+  ConfObject getSortedNamesByIndex( int anIndex ) {
+    return (ConfObject) mSortedNames.get( anIndex );
+  }
+  
+  
+  /************** mRawLines ************************/
+  void setRawLines( String[] lines ) {
+    mRawLines = lines;
+  }
+
+  String getRawLine( int i ) {
+    return mRawLines[i];
+  }
+  
+  int getRawLineLength() {
+    return mRawLines.length;
+  }
+  
+  /************** SortedNames ************************/
+  int getSortedNamesSize( ) {
+    return  mSortedNames.size();
   }
   
   /************** get ************************/
   ConfSection get( int i ) {
-    return (ConfSection) list.get( i );
+    return (ConfSection) mList.get( i );
   }
 
   /************** printIt ************************/
   void printIt() {
     println();
-    println("===== CONFIG (" + list.size() + ") :" + name + ": =====");
-    for (int i = 0 ; i < list.size(); i++) {
-      ((ConfSection) list.get(i)).printIt();
+    println("===== CONFIG (" + mList.size() + ") :" + mName + ": =====");
+    for (int i = 0 ; i < mList.size(); i++) {
+      ((ConfSection) mList.get(i)).printIt();
     }
     println("=========================================================");
     println();
@@ -590,22 +666,22 @@ class Config extends ConfObject {
 
   /************** rebuild ************************/
   void rebuild() {
-    sortedNames.clear();
+    mSortedNames.clear();
     
-    for (int i = 0 ; i < list.size(); i++) {
+    for (int i = 0 ; i < mList.size(); i++) {
       // Section
       ConfObject cs = get(i);
-      for (int j = 0 ; j < cs.list.size(); j++) {
+      for (int j = 0 ; j < cs.mList.size(); j++) {
         // ConfGroup
         ConfObject cg = cs.get(j);
-        if ( cg.haveSameName ) {
-          // Add only one entry for haveSameName groups
+        if ( cg.mHaveSameName ) {
+          // Add only one entry for mHaveSameName groups
           if ( cg.size() > 0 ) {
             addSorted( (ConfEntry) cg.get(0), false );
           }
         } else {
-          for (int k = 0 ; k < cg.list.size(); k++) {
-            addSorted( (ConfEntry) cg.get(k), cg.isMixed );
+          for (int k = 0 ; k < cg.mList.size(); k++) {
+            addSorted( (ConfEntry) cg.get(k), cg.mIsMixed );
           }
         }
       }
@@ -618,20 +694,20 @@ class Config extends ConfObject {
     String aName = ce.getName();
     int i = 0;
 
-    while ( ( i < sortedNames.size() ) && ( aName.compareTo( ((ConfEntry) sortedNames.get(i)).getName() ) > 0 ) ) {
+    while ( ( i < mSortedNames.size() ) && ( aName.compareTo( ((ConfEntry) mSortedNames.get(i)).getName() ) > 0 ) ) {
       i++;
     }
-    if ( ! ( i < sortedNames.size() ) ) {
+    if ( ! ( i < mSortedNames.size() ) ) {
       // append at the end if nothing smaller found
-      sortedNames.add( ce );
-    } else if ( aName.equals( ((ConfEntry) sortedNames.get(i)).getName() ) ) {
+      mSortedNames.add( ce );
+    } else if ( aName.equals( ((ConfEntry) mSortedNames.get(i)).getName() ) ) {
       if ( ! acceptDuplicate ) {
         println("!!Error!! Duplicate entry name :" +  aName );
         exit();
       }
     } else {
       // insert at the index of the first entry larger 
-      sortedNames.add( i, ce );
+      mSortedNames.add( i, ce );
     }
   }  
 
@@ -642,10 +718,10 @@ class Config extends ConfObject {
     
     int i = 0;
     int compRes;
-    while ( i < sortedNames.size() ) {
-      compRes = aName.compareTo( ((ConfEntry) sortedNames.get(i)).getName() );
+    while ( i < mSortedNames.size() ) {
+      compRes = aName.compareTo( ((ConfEntry) mSortedNames.get(i)).getName() );
       if ( compRes  == 0 ) {
-        return ((ConfEntry) sortedNames.get(i));
+        return ((ConfEntry) mSortedNames.get(i));
       } else if ( compRes < 0 ) {
         return null;
       } else {
@@ -663,8 +739,8 @@ class Config extends ConfObject {
     // Normal - All configs including comments
     ArrayList al = new ArrayList();
     
-    for (int i = 0 ; i < list.size(); i++) {
-      ConfSection cs = (ConfSection) list.get(i);
+    for (int i = 0 ; i < mList.size(); i++) {
+      ConfSection cs = (ConfSection) mList.get(i);
 
       if ( doMinimal ) {
         al.add("/************** Section : " + String.valueOf( i ) + " - " + cs.getName() + "  ****/" );
@@ -698,19 +774,18 @@ class Config extends ConfObject {
   ArrayList  getOriginalText() {
     ArrayList al = new ArrayList();
     
-    for (int i = 0 ; i < list.size(); i++) {
-      ((ConfSection) list.get(i)).appendOriginalText( al );
+    for (int i = 0 ; i < mList.size(); i++) {
+      ((ConfSection) mList.get(i)).appendOriginalText( al );
     }
  
-    if ( blockStart != -1 ) {
-      int j = blockStart;
-      while ( j <= blockEnd ) {
-        al.add( lines[j] );
+    if ( mBlockStart != -1 ) {
+      int j = mBlockStart;
+      while ( j <= mBlockEnd ) {
+        al.add( mRawLines[j] );
         j++;
       }
     }
  
     return al;
   }
-    
 }

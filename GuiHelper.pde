@@ -172,10 +172,10 @@ public void updateGroup(int newId) {
 
   if ( ! togAll.getState() ) {
     println("Selected Group Index : " + drpGroup.getId() );
-    grpSubSection.setText(cg.subsectionName);    
+    grpSubSection.setText(cg.getSubsectionName());    
 
     if ( cg.hasComments() ) {
-      txtGroupComment.setText( cg.comments );
+      txtGroupComment.setText( cg.getComments() );
     }
   }
   
@@ -257,20 +257,20 @@ void setEditorFieldsFromEntry( ConfEntry aCE ) {
     togEntryActive.setState( false );
   } else {
     if ( aCE.hasComments() ) {
-      txtEntryComment.setText( aCE.comments );
+      txtEntryComment.setText( aCE.getComments() );
     } else {
       txtEntryComment.setText( "" );
     }
       
     txfName.setValue( aCE.getName() );
-    if ( aCE.hasValue ) {
+    if ( aCE.hasValue() ) {
       txfValue.setValue( aCE.getValue() );
     } else {
       txfValue.setValue( "" );
     }
     
     txfComment.setValue( aCE.getLineComment() );
-    togEntryActive.setState( aCE.active );
+    togEntryActive.setState( aCE.isActive() );
   }
 }
 
@@ -282,16 +282,16 @@ public void updateCEList( ConfObject co, boolean blnActiveOnly ) {
   if ( co instanceof ConfGroup ) {
     for (int j = 0 ; j < co.size(); j++) {
       ConfEntry ce = (ConfEntry) co.get(j);
-      if ( ( ! blnActiveOnly ) || (ce.active ) ) {
+      if ( ( ! blnActiveOnly ) || (ce.isActive() ) ) {
         CurrentCEList.add ( ce );
       }
     }
   } else if ( co instanceof Config ) {
     Config con = (Config) co;
     
-    for (int j = 0 ; j < con.sortedNames.size(); j++) {
-      ConfEntry ce = (ConfEntry) ( con.sortedNames.get(j));
-      if ( ( ! blnActiveOnly ) || (ce.active ) ) {
+    for (int j = 0 ; j < con.getSortedNamesSize(); j++) {
+      ConfEntry ce = (ConfEntry) ( con.getSortedNamesByIndex(j));
+      if ( ( ! blnActiveOnly ) || (ce.isActive() ) ) {
         CurrentCEList.add ( ce );
       }
     }
@@ -375,8 +375,8 @@ public boolean isModified() {
   }
   
   if ( actEditCE.getName().equals( txfName.getText() ) ) {
-    if ( actEditCE.active == togEntryActive.getState() ) {
-      if ( ( ! actEditCE.hasValue() ) || ( actEditCE.value.equals( txfValue.getText() )  ) ) {
+    if ( actEditCE.isActive() == togEntryActive.getState() ) {
+      if ( ( ! actEditCE.hasValue() ) || ( actEditCE.getValue().equals( txfValue.getText() )  ) ) {
         if ( actEditCE.getLineComment().equals( txfComment.getText() ) ) {
           return false;
         }
@@ -395,30 +395,30 @@ public String validateEntry(String name, String value, String comment, boolean a
   ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
 
   // If newly activeated then check for haveSameName
-  if ( ( cg.haveSameName ) && ( active ) ){
+  if ( ( cg.haveSameName() ) && ( active ) ){
     for( int i = 0; i<cg.size(); i++ ) {
       ConfEntry ance = (ConfEntry) cg.get(i);
-      if ( ( ance.active ) && ( ! ance.equals( ce ) ) ) {
+      if ( ( ance.isActive() ) && ( ! ance.equals( ce ) ) ) {
         return "Multiple active entries in ZeroOne group - Deactive other entry first";
       }
     }
   }
 
   // If Mixed check for other active value with same name
-  if ( ( cg.isMixed ) && ( active ) ){
+  if ( ( cg.isMixed() ) && ( active ) ){
     for( int i = 0; i<cg.size(); i++ ) {
       ConfEntry ance = (ConfEntry) cg.get(i);
-      if ( ( ance.active ) && ( ! ance.equals( ce ) ) && ( ! ance.getName().equals( ce.getName() ) ) ) {
+      if ( ( ance.isActive() ) && ( ! ance.equals( ce ) ) && ( ! ance.getName().equals( ce.getName() ) ) ) {
         return "Multiple active entries with name \"" + ce.getName() + "\"in Mixed group - Deactive other entry first";
       }
     }
   }
 
   // If haveNoValue (meaning all entries only defines) I assume this is a toggle group where only one entry should be active  
-  if ( ( cg.haveNoValue ) && ( active ) ){
+  if ( ( cg.haveNoValue() ) && ( active ) ){
     for( int i = 0; i<cg.size(); i++ ) {
       ConfEntry ance = (ConfEntry) cg.get(i);
-      if ( ( ance.active ) && ( ! ance.equals( ce ) ) ) {
+      if ( ( ance.isActive() ) && ( ! ance.equals( ce ) ) ) {
         return "Multiple active entries in haveNoValue group - Deactive other entry first";
       }
     }
@@ -475,10 +475,10 @@ public boolean changeEntryfromForm() {
   }
     
   // Change entry
-  actEditCE.modified = true;
-  actEditCE.active =  active;
-  actEditCE.name =  name;
-  actEditCE.value =  value;
+  actEditCE.setModified(true);
+  actEditCE.setActive( active );
+  actEditCE.setName( name );
+  actEditCE.setValue( value );
   actEditCE.setLineComment( comment );
 
   // on Create new entry needs to be added
@@ -591,10 +591,10 @@ public void btnEditSave(int theValue) {
     ConfGroup cg = cs.get(drpGroup.getId());
     ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
     
-    boolean blnWithName =  ! cg.haveSameName ;
+    boolean blnWithName =  ! cg.haveSameName() ;
     boolean blnWithActive = true;
 
-    if ( cg.haveNoValue ) {
+    if ( cg.haveNoValue() ) {
       ConfEntry activeCE = cg.getFirstActive();
       if ( activeCE != null )
         if ( ! ( activeCE.equals( ce ) ) ) {
@@ -630,11 +630,11 @@ public void btnEditCreate(int theValue) {
   ConfGroup cg = cs.get(drpGroup.getId());
   ConfEntry ce = (ConfEntry) CurrentCEList.get(lstEntryName.getId());
   
-  boolean blnWithName =  ! cg.haveSameName ;
+  boolean blnWithName =  ! cg.haveSameName() ;
   boolean blnWithActive = true;
-  boolean blnWithValue = ! cg.haveNoValue;
+  boolean blnWithValue = ! cg.haveNoValue();
 
-  if ( cg.haveNoValue ) {
+  if ( cg.haveNoValue() ) {
     ConfEntry activeCE = cg.getFirstActive();
     if ( activeCE != null )
       if ( ! ( activeCE.equals( ce ) ) ) {
@@ -647,7 +647,7 @@ public void btnEditCreate(int theValue) {
     dummyLine += "//";
   }
   dummyLine += SL_SETTING;
-  if ( cg.haveSameName ) {
+  if ( cg.haveSameName() ) {
     dummyLine += ce.getName();
   } else {
     dummyLine += DUMMY_NAME;

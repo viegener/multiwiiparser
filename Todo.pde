@@ -1,4 +1,8 @@
-
+/*************************************************************************************************/
+/*****************                                                                 ***************/
+/****************  TODO (and Done LIST)  --> No Code in here                               *******/
+/*****************                                                                 ***************/
+/*************************************************************************************************/
 
 
 static final String MWP_VERSION = "0.1";
@@ -35,7 +39,6 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 - event output bound to debug setting
 - Add javadoc
 - Allow search for entries
-- Cleanup visibility in Conf* Classes 
 
 
 ---- NICE TO HAVE ------
@@ -59,6 +62,7 @@ DONE:
 - Adapt lengths of dropBox
 - DEFECT: In ShowAll mode still access to grouplist is done while refreshing screen leading to index-exceptions
 - DEFECT: in Position 0,0 seems to be some output of an unknown control -> Coming from grpSelector name
+- Cleanup of member variables in classes and visibility / no outside access to member (although proteced does not prevent this)
 
 28.3.2013
 - MOdify colors for Edit fields when inactive --> Grey
