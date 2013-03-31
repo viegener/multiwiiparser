@@ -6,15 +6,15 @@
 
 
 static final String MWP_VERSION = "0.2";
-static final String MWP_REVISION = "2013/03/30"; 
+static final String MWP_REVISION = "2013/03/31"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
 
 /***************** TODO **********************************************************
-
-- In dropdownlistbox active entry should be marked and rest of th elist should be grey (as in List)
-- DEFECT: DropDown texts might be too long and need to be cutted
+- add difference viewer (in separate tab?) : Two coupled list boxes / green for added-red for removed/add empty lines 
+- allow selection of section in diff viewer
+- add keys to textfield --> Posi, End, Ctrl-C, Ctrl-V (Copy past allow copying pasting full current field)
 
 * USECASE 3 - Open two different config.h and show the differences
     -- TODO: Show the delta
@@ -24,7 +24,7 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
     -- TODO: Deactivate other entries if necessary (based on Groups)
 
 * USECASE 5 - Handle a persistent catalog for config files
-    -- TODO: Show current filename
+    -- Show current filename
     -- TODO: Show last filenames used
     -- TODO: Assign a name for a filename
     -- TODO: Apply a filename into a multiwii directory
@@ -48,6 +48,20 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 
 =======================================================================================
 DONE:
+31.3.2013
+- Go from textField to LTextfield (Labels not needed anymore)
+- Extend Toggles to Show text inside / and have labels not only in Uppercase letters (allow configuration of label position)
+- Move from Toggle to InToggle
+- In dropdownlistbox active entry should be marked and rest of th elist should be grey (as in List)
+- DEFECT: DropDown texts might be too long and need to be cutted
+
+30.3.2013
+- minimal config can also be reloaded
+- minimal config has normal sections
+- added tabs for file and details
+- start with 0.3
+------------------
+
 29.3.2013
 - remove a config value
 - Validate name to avoid duplicates

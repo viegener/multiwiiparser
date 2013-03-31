@@ -118,7 +118,9 @@ boolean isSingleCommentLine(String line) {
   return ( startsWith( line, "//" ) ) && ( ! startsWith( line.substring(2).trim(), "#define " ) ); 
 }
 
-/*******************************/
+/*************************************************************************************************/
+/**************** parseConfig                                                                   *******/
+/*************************************************************************************************/
 Config parseConfig(String filename) {
 
   Config config = new Config(filename);
@@ -192,11 +194,19 @@ Config parseConfig(String filename) {
               pendingComments = "";
             }
 
+            if ( cs!= null ) {
+              if ( cs.size() > 0 ) {
+                config .add( cs );
+              }
+            }            
             cs = new ConfSection( config, baseLine );
-            config.add( cs );
             
+            if ( isDebug( DEBUG_PARSER_DETAIL ) ) {
+              println( "   : new Section: " + baseLine + ":");
+            }
             subsectionName = "";
             groupName = "";
+            cg = null;
             
           } else if ( starNo == 2 ) {
             // group 1 lines
@@ -233,6 +243,7 @@ Config parseConfig(String filename) {
               subsectionName = "";
             } else {
               println("!! NO name for ssn/gN in Line :"+ baseLine + ":" );
+              groupName = "<default>";
             }
           }
           cg = new ConfGroup( config, subsectionName, groupName );
@@ -290,6 +301,13 @@ Config parseConfig(String filename) {
 /* */
   } // end while lineNo
   
+
+  // add remaining section to config
+  if ( cs!= null ) {
+    if ( cs.size() > 0 ) {
+      config .add( cs );
+    }
+  }            
 
   // add remaining lines to config
   if ( blockStart < (lineNo-1) ) {

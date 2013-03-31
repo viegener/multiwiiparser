@@ -17,6 +17,43 @@ boolean isCreateEditor = false;
 boolean isUpdateEnabled = true;
 
 /*************************************************************************************************/
+
+static final int TAB_DETAILS = 1;
+static final int TAB_DEFAULT = 2;
+
+int CurrentTabMode = 0;
+/*************************************************************************************************/
+
+
+/*************************************************************************************************/
+/****************  SwitchTabs                                                              *******/
+/*************************************************************************************************/
+
+public boolean switchToTab( Tab aTab ) {
+  
+  if ( aTab == tabDetails ) {
+    if ( g_config != null ) { 
+      CurrentTabMode = TAB_DETAILS;
+      tabDetails.setActive(true);
+
+      tabDefault.setActive(false);
+      return true;
+    }
+  } else if ( aTab == tabDefault ) {
+      CurrentTabMode = TAB_DEFAULT;
+      tabDefault.setActive(true);
+
+      tabDetails.setActive(false);
+      return true;
+  }
+
+  return false;
+}
+
+
+
+
+/*************************************************************************************************/
 /****************  Central Event Handler and Buttons                                       *******/
 /*************************************************************************************************/
 
@@ -101,6 +138,26 @@ public void updateToggle(Toggle aToggle) {
   updateSection(-1);
 
 }
+
+
+/*************************************************************************************************/
+/************* newId -1 means just refresh the UI */
+/************* newId -2 means just refresh the UI and do not promote to subsequent controls */
+public void updateConfig(Config aConfig) {
+
+  isUpdateEnabled = false;
+  drpSection.setIndex(0);
+  drpSection.clear();  
+  isUpdateEnabled = true;
+  
+  g_config = aConfig;
+  txfFilename.setText( g_config.getName() );
+  
+  switchToTab( tabDetails );
+  drpSection.addItems( g_config.getDisplayNames() );
+  drpSection.setIndex(0);
+}
+
 
 /*************************************************************************************************/
 /************* newId -1 means just refresh the UI */

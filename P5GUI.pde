@@ -15,17 +15,12 @@ ControlP5 cp5;
 
 Label dummyLabel;
 
-Textlabel lblSection; 
-Textlabel lblGroup; 
-Textlabel lblEntry; 
 
-Textlabel lblName; 
-Textlabel lblValue; 
-Textlabel lblComment; 
+Tab tabDetails;
+Tab tabDefault;
 
-DropdownList  drpSection;
-DropdownList  drpGroup;
-DropdownList  drpEntry;
+LDropdownList  drpSection;
+LDropdownList  drpGroup;
 
 Textarea txtGroupComment; 
 Textarea txtEntryComment; 
@@ -35,18 +30,18 @@ SelectListBox lstEntryName;
 SelectListBox lstEntryStatus;
 SelectListBox lstEntryComm;
 
-Toggle togAll;
-Toggle togShowOnlyActive;
+InToggle togAll;
+InToggle togShowOnlyActive;
 
-Toggle togEntryActive;
+InToggle togEntryActive;
 
-Toggle togNoValue;
-Toggle togSameName;
+InToggle togNoValue;
+InToggle togSameName;
 
-Textfield txfName;
-Textfield txfValue;
-Textfield txfComment;
-Toggle togSetActive;
+LTextfield txfName;
+LTextfield txfValue;
+LTextfield txfComment;
+InToggle togSetActive;
 
 Button btnWriteMinimal;
 Button btnWriteFull;
@@ -56,11 +51,12 @@ Button btnEditSave;
 Button btnEditCreate;
 Button btnEditRemove;
 
-ControlGroup grpButtons;
-ControlGroup grpSelectors;
-ControlGroup grpEditor;
+/***************************/
+
+Textfield txfFilename;
 
 
+CColor notrans;
 
 /*************************************************************************************************/
 /****************  Create the GUI during setup()                                           *******/
@@ -77,6 +73,8 @@ public void initializeGUI() {
   
   cp5 = new ControlP5(this, pfont);
   
+  notrans = new CColor(0x00016c9e, 0x0002344d, 0x0000b4ea, 0x00ffffff, 0x00ffffff); 
+    
   int pfont_height = 10;
   int pfontBig_height = 12;
   
@@ -86,11 +84,11 @@ public void initializeGUI() {
   int ControlXPos = 92;
   int AdditionalXPos = 630;
 
-  int SectionYPos = 15;
-  int GroupYPos = 70;
+  int SectionYPos = 40;
+  int GroupYPos = 80;
   int EntryYPos = 200;
   int DetailYPos = 340;
-  int ButtonYPos = 410;
+  int ButtonYPos = 420;
 
   /***********/
   
@@ -98,27 +96,44 @@ public void initializeGUI() {
   dummyLabel.hide();
 
   /*********************/
-  grpSelectors = cp5.addGroup( "" );
+  /* Tabs */
+  
+  tabDefault = cp5.getTab("default")
+     .setLabel("  File Store  ")
+     .setId(1)
+     ;
 
-  /*********************/
+  tabDetails = cp5.addTab("details")
+   .setLabel("  Config Details  ")
+//   .setColorBackground(color(0, 160, 100))
+//   .setColorLabel(color(255))
+//   .setColorActive(color(255,128,0))
+   .setId(2)
+   ;
 
+
+
+  /***********************************/
+  /********* DETAILS *****************/
+  /***********************************/
+  
   txtGroupComment = cp5.addTextarea("txtGroupComment")
                   .setPosition(ControlXPos, GroupYPos+(pfont_height/2))
                   .setSize(405, 50)
-    .disableColorBackground()
+                  .disableColorBackground()
                   .setFont(pfont)
                   .setLineHeight(pfont_height+4)
-                  .moveTo( grpSelectors )
+                  .moveTo( tabDetails )
                   ;
   
   
   grpSubSection = cp5.addTextarea("grpSubSection")
                   .setPosition(ControlXPos, GroupYPos-4*(pfont_height))
                   .setSize(405, 20)
-    .disableColorBackground()
+                  .disableColorBackground()
                   .setFont(pfont)
                   .setLineHeight(pfont_height+4)
-                  .moveTo( grpSelectors )
+                  .moveTo( tabDetails )
                   ;
 
   txtEntryComment = cp5.addTextarea("txtEntryComment")
@@ -127,11 +142,11 @@ public void initializeGUI() {
                   .disableColorBackground()
                   .setFont(pfont)
                   .setLineHeight(pfont_height+4)
-                  .moveTo( grpSelectors )
+                  .moveTo( tabDetails )
                   ;
   
   lstEntryName = new SelectListBox( cp5, "lstEntryName" );
-        ((ListBox) lstEntryName)
+  lstEntryName.setLabelText("Entry   ")
          .setPosition(ControlXPos, EntryYPos-(pfont_height+4))
          .setSize(307, 150)
          .setItemHeight(15)
@@ -144,7 +159,7 @@ public void initializeGUI() {
          .setColorBackground(color(255, 128))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
-         .moveTo( grpSelectors )
+         .moveTo( tabDetails )
          ;
 
   lstEntryStatus = new SelectListBox( cp5, "lstEntryStatus" );
@@ -161,7 +176,7 @@ public void initializeGUI() {
          .setColorBackground(color(255, 128))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
-         .moveTo( grpSelectors )
+         .moveTo( tabDetails )
          ;
 
   lstEntryComm = new SelectListBox( cp5, "lstEntryComm" );
@@ -177,7 +192,7 @@ public void initializeGUI() {
          .setColorBackground(color(255, 128))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
-         .moveTo( grpSelectors )
+         .moveTo( tabDetails )
          ;
 
   ArrayList arrSLB = new ArrayList();
@@ -190,88 +205,85 @@ public void initializeGUI() {
   lstEntryComm.addOthers( arrSLB );
 
   /******** TOGGLE for Group properties */
-  togNoValue = cp5.addToggle("NO Value")
-     .setPosition(AdditionalXPos,EntryYPos-(pfont_height+4)-40 )
-     .setSize(50,20)
+  togNoValue = new InToggle( cp5, "NO Value");
+  togNoValue.setPosition(AdditionalXPos,EntryYPos-40 )
+     .setSize(60,20)
      .setValue(false)
-     .moveTo( grpSelectors )
+     .moveTo( tabDetails )
      ;
 
-  togSameName = cp5.addToggle("=Name")
-     .setPosition(AdditionalXPos+togNoValue.getWidth()+20,EntryYPos-(pfont_height+4)-40 )
+  togSameName = new InToggle( cp5, "=Name");
+  togSameName.setPosition(AdditionalXPos+togNoValue.getWidth()+10,EntryYPos-40 )
      .setSize(50,20)
      .setValue(false)
      .lock()
-     .moveTo( grpSelectors )
+     .moveTo( tabDetails )
      ;
 
   /******** TOGGLE for Special displays */
-  togAll = cp5.addToggle("Show All")
-     .setPosition(AdditionalXPos,SectionYPos-(pfont_height+4) )
-     .setSize(50,20)
+  togAll = new InToggle( cp5, "Show All");
+  togAll.setPosition(AdditionalXPos,SectionYPos-(pfont_height+4) )
+     .setSize(60,20)
      .setValue(false)
-     .moveTo( grpSelectors )
+     .moveTo( tabDetails )
      ;
 
-  togShowOnlyActive = cp5.addToggle("Only Active")
-     .setPosition(AdditionalXPos+togAll.getWidth()+20,SectionYPos -(pfont_height+4))
-     .setSize(50,20)
+  togShowOnlyActive = new InToggle( cp5, "Only Active");
+  togShowOnlyActive.setPosition(AdditionalXPos+togAll.getWidth()+20,SectionYPos -(pfont_height+4))
+     .setSize(70,20)
      .setValue(false)
-     .moveTo( grpSelectors )
+     .moveTo( tabDetails )
      ;
      
-     
-  /*********/
-  lblName = cp5.addTextlabel("lblName")
-    .setText( "Name" )
-    .setPosition( LabelXPos, DetailYPos )
-    ;
 
+  /******** EDitor Fields */
 
-  txfName = cp5.addTextfield("txfName")
-    .setPosition(ControlXPos, DetailYPos)
+  txfName = new LTextfield( cp5, "txfName" );
+  txfName.setPosition(ControlXPos, DetailYPos)
     .setSize(550,20)
     .setAutoClear(false)
     .setFont( pfontEditor )
+    .setCaptionLabel("Name   ")
     .lock()
+    .moveTo( tabDetails )
     ;
 
-  togEntryActive = cp5.addToggle("Active")
-     .setPosition(ControlXPos + 600,DetailYPos )
+  togEntryActive = new InToggle( cp5, "Active");
+  togEntryActive.setPosition(ControlXPos + 600,DetailYPos )
      .setSize(50,20)
      .setValue(false)
      .lock()
+     .moveTo( tabDetails )
      ;
 
 
-  lblValue = cp5.addTextlabel("lblValue")
-    .setText( "Value" )
-    .setPosition( LabelXPos, DetailYPos+22 );
-
-  txfValue = cp5.addTextfield("txfValue")
-    .setPosition(ControlXPos, DetailYPos+22)
+  txfValue = new LTextfield( cp5, "txfValue" );
+  txfValue.setPosition(ControlXPos, DetailYPos+22)
     .setSize(550,20)
     .setAutoClear(false)
     .setFont( pfontEditor )
+    .setCaptionLabel("Value   ")
     .lock()
+     .moveTo( tabDetails )
     ;
        
-  lblComment = cp5.addTextlabel("lblComment")
-    .setText( "Comment" )
-    .setPosition( LabelXPos, DetailYPos+44 );
-
-  txfComment = cp5.addTextfield("txfComment")
-    .setPosition(ControlXPos, DetailYPos+44)
+  txfComment = new LTextfield( cp5, "txfComment" );
+  txfComment.setPosition(ControlXPos, DetailYPos+44)
     .setSize(670,20)
     .setAutoClear(false)
     .setFont( pfontEditor )
+    .setCaptionLabel("Comment   ")
     .lock()
+    .moveTo( tabDetails )
     ;
 
+
+  /******** Buttons */
   btnEditSave = cp5.addButton("btnEditSave")
      .setPosition(ControlXPos,ButtonYPos)
      .setSize(80,20)
      .setCaptionLabel( "   Edit" )
+     .moveTo( tabDetails )
      ;
 
   btnEditCancel = cp5.addButton("btnEditCancel")
@@ -279,55 +291,79 @@ public void initializeGUI() {
      .setSize(80,20)
      .setCaptionLabel( "   Cancel" )
      .setVisible(false)
+     .moveTo( tabDetails )
      ;
 
   btnEditCreate = cp5.addButton("btnEditCreate")
      .setPosition(btnEditCancel.getPosition().x+btnEditCancel.getWidth()+30,ButtonYPos)
      .setSize(80,20)
      .setCaptionLabel( "   Create" )
+     .moveTo( tabDetails )
      ;
 
   btnEditRemove = cp5.addButton("btnEditRemove")
      .setPosition(btnEditCreate.getPosition().x+btnEditCreate.getWidth()+30,ButtonYPos)
      .setSize(80,20)
      .setCaptionLabel( "   Remove" )
+     .moveTo( tabDetails )
      ;
 
   btnWriteFull = cp5.addButton("btnWriteFull")
      .setPosition(AdditionalXPos,ButtonYPos)
      .setSize(50,20)
      .setCaptionLabel( " Write" )
+     .moveTo( tabDetails )
      ;
 
   btnWriteMinimal = cp5.addButton("btnWriteMinimal")
      .setPosition(AdditionalXPos+btnWriteFull.getWidth()+15,ButtonYPos)
      .setSize(60,20)
      .setCaptionLabel( " Minimal" )
+     .moveTo( tabDetails )
      ;
 
-  lblEntry = cp5.addTextlabel("lblEntry")
-    .setText( "Entry" )
-    .setPosition( LabelXPos, EntryYPos-(pfont_height+4) );
+  /******** DropDownLists */
+  drpGroup  = new LDropdownList( cp5, "drpGroup", ControlXPos, GroupYPos, 590, 130);
+  drpGroup.setLabelText( "Group   " )
+     .setBarHeight( pfont_height+4 )
+     .moveTo( tabDetails )
+     .setBackgroundColor(color(0,0))
+     .setColorBackground(color(255, 128))
+     .setColorActive(color(0))
+     .setColorForeground(color(255, 100,0))
+        ; 
 
-  lblGroup = cp5.addTextlabel("lblGroup")
-    .setText( "Group" )
-    .setPosition( LabelXPos, GroupYPos-(pfont_height+4) );
-  drpGroup = cp5.addDropdownList("drpGroup", ControlXPos, GroupYPos, 590, 130)
-        .setBarHeight( pfont_height+4 ); 
+  drpSection = new LDropdownList( cp5, "drpSection", ControlXPos, SectionYPos, 530, 100);
+  drpSection.setLabelText( "Section   " )
+     .setBarHeight( pfont_height+4 )
+     .moveTo( tabDetails )
+     .setBackgroundColor(color(0,0))
+     .setColorBackground(color(255, 128))
+     .setColorActive(color(0))
+     .setColorForeground(color(255, 100,0))
+        ; 
 
-  lblSection = cp5.addTextlabel("lblSection")
-    .setText( "Section" )
-    .setPosition( LabelXPos, SectionYPos-(pfont_height+4) );
-  drpSection = cp5.addDropdownList("drpSection", ControlXPos, SectionYPos, 530, 100)
-        .setBarHeight( pfont_height+4 ); 
+  /***********************************/
+  /********* DEFAULT *****************/
+  /***********************************/
 
 
-  println("createGUI : End create controls");
+  txfFilename = new LTextfield( cp5, "txfFilename" );
+  txfFilename.setPosition(ControlXPos, SectionYPos)
+    .setSize(550,20)
+    .setAutoClear(false)
+    .setFont( pfontEditor )
+    .lock()
+    .setCaptionLabel("Filename     ")
+     .moveTo( tabDefault )
+    ;
 
-  drpSection.clear();  
-  drpSection.addItems( g_config.getDisplayNames() );
-  drpSection.setIndex(0);
-  updateSection(0);
+
+
+
+
+
+
 
   // add mousewheel support, now hover the slide with your mouse
   // and use the mousewheel (or trackpad on a macbook) to change the 

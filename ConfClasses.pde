@@ -746,15 +746,15 @@ class Config extends ConfObject {
     for (int i = 0 ; i < mList.size(); i++) {
       ConfSection cs = (ConfSection) mList.get(i);
 
-      if ( doMinimal ) {
-        al.add("/************** Section : " + String.valueOf( i ) + " - " + cs.getName() + "  ****/" );
-      } else {
+//      if ( doMinimal ) {
+//        al.add("/************** Section : " + String.valueOf( i ) + " - " + cs.getName() + "  ****/" );
+//      } else {
         al.add( "" );
         al.add( "" );
         al.add( COMMENT_STARLINE );
         al.add( COMMENT_STAR2LINE );
         
-        String text = " SECTION " + String.valueOf( i ) + " - " + cs.getName() + " ";
+        String text = "  " + cs.getName() + " ";
         int len = COMMENT_STARLINE.length() - ( text.length()+COMMENT_STAR_LEN+1+COMMENT_STAR_LEN );
         
         text =  COMMENT_STARLINE.substring( 0, COMMENT_STAR_LEN+ 1 ) + text;
@@ -768,7 +768,8 @@ class Config extends ConfObject {
         
         al.add( COMMENT_STAR2LINE );
         al.add( COMMENT_STARLINE );
-     }
+        al.add( "" );
+//     }
       cs.appendOutput( al, doMinimal );
     }
     return al;

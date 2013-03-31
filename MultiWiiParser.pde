@@ -40,7 +40,7 @@ boolean isDebug( int level ) {
 /*************************************************************************************************/
 
 
-Config readAConfig( boolean setGlobal ) {
+Config readAConfig( ) {
   Config config = null;
   
   if ( isDebug( DEBUG_FIXED_FILE ) ) {
@@ -51,18 +51,14 @@ Config readAConfig( boolean setGlobal ) {
     isFileSelected = false;
     selectInput( "Select a config.h file", "fileSelected" );
 
+    // wait for file selected (ouch)
     while ( ! isFileSelected ) {
       delay(200);
     }
-
   }
   
   if ( ! ( g_file == null ) ) {
     config = parseConfig(g_file.getAbsolutePath() );
-    
-    if ( setGlobal ) {
-      g_config = config;
-    }
   }
   
   return config;
@@ -116,12 +112,15 @@ void fileSelected( File aFile ) {
 
 void setup(){
 
+  Config aConfig = readAConfig();
+
   g_config = null;
 
-  if ( readAConfig( true ) == null ) {
+  if ( aConfig == null ) {
     exit();
   } else {
     initializeGUI();
+    updateConfig( aConfig );
     println("Ende Setup");
   }
 
