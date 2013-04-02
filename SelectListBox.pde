@@ -19,8 +19,6 @@ public class InToggle extends Toggle {
 }
 
 
-
-
 public class LTextfield extends Textfield {
  
    public LTextfield(ControlP5 theControlP5, String theName) {  
@@ -48,6 +46,8 @@ public class LDropdownList extends DropdownList {
 
     _myValueLabel.toUpperCase( false );
     _myValueLabel.align(ControlP5.LEFT_OUTSIDE, ControlP5.TOP_OUTSIDE); 
+
+    _myLabel.setColorBackground( getColor().getActive() );
    }
 
   public LDropdownList setLabelText(String aText) {
@@ -116,6 +116,7 @@ public class SelectListBox extends ListBox {
     _myValueLabel.align(ControlP5.LEFT_OUTSIDE, ControlP5.CENTER); 
     _myValueLabel.toUpperCase( false );
     _myValueLabel.setText("");
+    
 }
 
   public SelectListBox setLabelText(String aText) {

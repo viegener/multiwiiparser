@@ -5,6 +5,8 @@
 /*************************************************************************************************/
 
 
+import javax.swing.*;
+
 import controlP5.*;
 
 /*************************************************************************************************/
@@ -16,8 +18,7 @@ ControlP5 cp5;
 Label dummyLabel;
 
 
-Tab tabDetails;
-Tab tabDefault;
+/***************************/
 
 LDropdownList  drpSection;
 LDropdownList  drpGroup;
@@ -54,9 +55,39 @@ Button btnEditRemove;
 /***************************/
 
 Textfield txfFilename;
+Textfield txfCompareFile;
 
+Button btnAddToFavorites;
+Button btnSelectFile;
+
+Button btnCompAddToFavorites;
+Button btnSelectCompFile;
+
+
+
+/***************************/
+
+SelectListBox lstEntryLeft;
+SelectListBox lstEntryInfo;
+SelectListBox lstEntryRight;
+
+/***************************/
 
 CColor notrans;
+
+/*************************************************************************************************/
+
+Tab tabDefault;
+Tab tabDetails;
+Tab tabCompare;
+
+static final int TAB_DETAILS = 1;
+static final int TAB_DEFAULT = 2;
+static final int TAB_COMPARE = 3;
+
+int CurrentTabMode = 0;
+
+/*************************************************************************************************/
 
 /*************************************************************************************************/
 /****************  Create the GUI during setup()                                           *******/
@@ -112,6 +143,11 @@ public void initializeGUI() {
    ;
 
 
+  tabCompare = cp5.getTab("compare")
+     .setLabel("  Compare  ")
+     .setId(3)
+     ;
+
 
   /***********************************/
   /********* DETAILS *****************/
@@ -156,7 +192,7 @@ public void initializeGUI() {
          .actAsPulldownMenu( false )
          .setUpdate( true )
          .hideBar()
-         .setColorBackground(color(255, 128))
+         .setColorBackground(color(255, 20))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
          .moveTo( tabDetails )
@@ -173,7 +209,7 @@ public void initializeGUI() {
          .actAsPulldownMenu( false )
          .setUpdate( true )
          .hideBar()
-         .setColorBackground(color(255, 128))
+         .setColorBackground(color(255, 20))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
          .moveTo( tabDetails )
@@ -189,7 +225,7 @@ public void initializeGUI() {
          .actAsPulldownMenu( false )
          .setUpdate( true )
          .hideBar()
-         .setColorBackground(color(255, 128))
+         .setColorBackground(color(255, 20))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
          .moveTo( tabDetails )
@@ -328,7 +364,7 @@ public void initializeGUI() {
      .setBarHeight( pfont_height+4 )
      .moveTo( tabDetails )
      .setBackgroundColor(color(0,0))
-     .setColorBackground(color(255, 128))
+     .setColorBackground(color(255, 20))
      .setColorActive(color(0))
      .setColorForeground(color(255, 100,0))
         ; 
@@ -338,7 +374,7 @@ public void initializeGUI() {
      .setBarHeight( pfont_height+4 )
      .moveTo( tabDetails )
      .setBackgroundColor(color(0,0))
-     .setColorBackground(color(255, 128))
+     .setColorBackground(color(255, 20))
      .setColorActive(color(0))
      .setColorForeground(color(255, 100,0))
         ; 
@@ -354,15 +390,127 @@ public void initializeGUI() {
     .setAutoClear(false)
     .setFont( pfontEditor )
     .lock()
-    .setCaptionLabel("Filename     ")
+    .setCaptionLabel("Filename  ")
      .moveTo( tabDefault )
     ;
 
+  /******** Buttons */
+  btnAddToFavorites = cp5.addButton("btnAddToFavorites")
+     .setPosition(ControlXPos,SectionYPos + 30)
+     .setSize(120,20)
+     .setCaptionLabel( "   Add to Favorites" )
+     .moveTo( tabDefault )
+     ;
+
+  btnSelectFile = cp5.addButton("btnSelectFile")
+     .setPosition(ControlXPos + btnAddToFavorites.getWidth() + 10,SectionYPos + 30)
+     .setSize(120,20)
+     .setCaptionLabel( "   Select File" )
+     .moveTo( tabDefault )
+     ;
+
+  /************** Compare ********/
+  txfCompareFile = new LTextfield( cp5, "txfCompareFile" );
+  txfCompareFile.setPosition(ControlXPos, SectionYPos+70)
+    .setSize(550,20)
+    .setAutoClear(false)
+    .setFont( pfontEditor )
+    .lock()
+    .setCaptionLabel("Compared to   ")
+     .moveTo( tabDefault )
+    ;
+
+  /******** Buttons */
+  btnCompAddToFavorites = cp5.addButton("btnCompAddToFavorites")
+     .setPosition(ControlXPos,SectionYPos + 30+70)
+     .setSize(120,20)
+     .setCaptionLabel( "   Add to Favorites" )
+     .moveTo( tabDefault )
+     ;
+
+  btnSelectCompFile = cp5.addButton("btnSelectCompFile")
+     .setPosition(ControlXPos + btnAddToFavorites.getWidth() + 10,SectionYPos + 30+70)
+     .setSize(120,20)
+     .setCaptionLabel( "   Select File" )
+     .moveTo( tabDefault )
+     ;
+
+
+  /***********************************/
+  /********* COMPARE *****************/
+  /***********************************/
+
+
+  /***************************/
+  int LeftXPos = 100;
+  int MiddleXPos = 400;
+  int RightXPos = 450;
+
+  /***************************/
+
+  lstEntryLeft = new SelectListBox( cp5, "lstEntryLeft" );
+  lstEntryLeft.setLabelText("Entry   ")
+         .setPosition(LeftXPos, GroupYPos)
+         .setSize(300, 260)
+         .setItemHeight(15)
+         .setBarHeight(15)
+         .setScrollbarVisible( true )
+         .setScrollbarWidth(0)
+         .actAsPulldownMenu( false )
+         .setUpdate( true )
+         .hideBar()
+         .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+         .setColorForeground(color(255, 100,0))
+         .moveTo( tabCompare )
+         ;
+
+  lstEntryInfo = new SelectListBox( cp5, "lstEntryInfo" );
+  lstEntryInfo.setLabelText("")
+         .setPosition(MiddleXPos+5, GroupYPos)
+         .setSize(30, 260)
+         .setItemHeight(15)
+         .setBarHeight(15)
+         .setScrollbarWidth(0)
+         .setScrollbarVisible( true )
+         .actAsPulldownMenu( false )
+         .setUpdate( true )
+         .hideBar()
+         .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+         .setColorForeground(color(255, 100,0))
+         .moveTo( tabCompare )
+         ;
+
+  lstEntryRight = new SelectListBox( cp5, "lstEntryRight" );
+  lstEntryRight.setLabelText("")
+         .setPosition(RightXPos, GroupYPos)
+         .setSize(300, 260)
+         .setItemHeight(15)
+         .setBarHeight(15)
+         .setScrollbarVisible( true )
+         .actAsPulldownMenu( false )
+         .setUpdate( true )
+         .hideBar()
+         .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+         .setColorForeground(color(255, 100,0))
+         ;
+
+  ArrayList arrSLB2 = new ArrayList();
+  arrSLB2.add( lstEntryLeft );
+  arrSLB2.add( lstEntryInfo );
+  arrSLB2.add( lstEntryRight );
+  
+  lstEntryLeft.addOthers( arrSLB2 );
+  lstEntryInfo.addOthers( arrSLB2 );
+  lstEntryRight.addOthers( arrSLB2 );
 
 
 
-
-
+  /***********************************/
+  /*********  *****************/
+  /***********************************/
 
 
   // add mousewheel support, now hover the slide with your mouse
@@ -389,3 +537,97 @@ void addMouseWheelListener() {
   }
   );
 }
+
+/*************************************************************************************************/
+/****************  Central Event Handler                                                   *******/
+/*************************************************************************************************/
+
+/*************************************************************************************************/
+void controlEvent(ControlEvent theEvent) {
+  // DropdownList is of type ControlGroup.
+  // A controlEvent will be triggered from inside the ControlGroup class.
+  // therefore you need to check the originator of the Event with
+  // if (theEvent.isGroup())
+  // to avoid an error message thrown by controlP5.
+
+  if (theEvent.isGroup()) {
+    // Check if Event was triggered from drpSection
+    if ( theEvent.getGroup().equals( drpSection ) ) {
+      println("  event from drpSection ");
+      updateSection((int(theEvent.getGroup().getValue())));     
+    } else     if ( theEvent.getGroup().equals( drpGroup ) ) {
+      println("  event from drpGroup ");
+      updateGroup((int(theEvent.getGroup().getValue())));     
+    } else     if ( theEvent.getGroup() instanceof SelectListBox ) {
+      println("  event from lstEntryName ");
+      updateEntry((int(theEvent.getGroup().getValue())));     
+    }
+
+    println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
+  } else if (  ( theEvent.getController() instanceof Toggle) ) {  
+    if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togShowOnlyActive ) ) ) { 
+      updateToggle((Toggle) theEvent.getController());
+    } else if ( ( theEvent.getController().equals( togNoValue ) )  ) { 
+      updateToggleNoValue();
+    }
+  }
+
+}
+
+/*************************************************************************************************/
+/****************  SwitchTabs                                                              *******/
+/*************************************************************************************************/
+
+public boolean switchToTab( Tab aTab ) {
+  
+  if ( aTab == tabDetails ) {
+    if ( g_config != null ) { 
+      CurrentTabMode = TAB_DETAILS;
+      tabDetails.setActive(true);
+
+      tabDefault.setActive(false);
+      tabCompare.setActive(false);
+      return true;
+    }
+  } else if ( aTab == tabDefault ) {
+      CurrentTabMode = TAB_DEFAULT;
+      tabDefault.setActive(true);
+
+      tabDetails.setActive(false);
+      tabCompare.setActive(false);
+      return true;
+  } else if ( aTab == tabCompare ) {
+      CurrentTabMode = TAB_COMPARE;
+      tabCompare.setActive(true);
+
+      tabDefault.setActive(false);
+      tabDetails.setActive(false);
+      return true;
+  }
+
+  return false;
+}
+
+/*************************************************************************************************/
+/****************  Default buttons                                                              *******/
+/*************************************************************************************************/
+
+/*************************************************************************************************/
+public void btnSelectFile(int theValue) {
+  Config aConfig = readAConfig();
+
+  if ( aConfig != null ) {
+    updateConfig( aConfig );
+  }
+}
+
+/*************************************************************************************************/
+public void btnSelectCompFile(int theValue) {
+  Config aConfig = readAConfig();
+
+  if ( aConfig != null ) {
+    updateCompConfig( aConfig );
+  }
+}
+
+

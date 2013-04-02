@@ -5,8 +5,8 @@
 /*************************************************************************************************/
 
 
-static final String MWP_VERSION = "0.2";
-static final String MWP_REVISION = "2013/03/31"; 
+static final String MWP_VERSION = "0.3 pre";
+static final String MWP_REVISION = "2013/04/02"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
@@ -48,6 +48,13 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 
 =======================================================================================
 DONE:
+03.4.2013
+- Colors in Dropdown adapted / better visible
+- File selection in Default tab
+- New tab for compare
+- Prepared compare with lists and additional file selecction
+
+
 31.3.2013
 - Go from textField to LTextfield (Labels not needed anymore)
 - Extend Toggles to Show text inside / and have labels not only in Uppercase letters (allow configuration of label position)

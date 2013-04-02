@@ -1,10 +1,8 @@
 /*************************************************************************************************/
 /*****************                                                                 ***************/
-/****************  GUIHELPER                                                               *******/
+/****************  GUIDETAILS                                                               *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
-
-import javax.swing.*;
 
 /* Other Status flags and data */
 ConfEntry actEditCE;
@@ -16,79 +14,17 @@ boolean isEditMode;
 boolean isCreateEditor = false;
 boolean isUpdateEnabled = true;
 
-/*************************************************************************************************/
+/*********************************************************************************/
 
-static final int TAB_DETAILS = 1;
-static final int TAB_DEFAULT = 2;
+Config g_config;
 
-int CurrentTabMode = 0;
 /*************************************************************************************************/
 
 
 /*************************************************************************************************/
-/****************  SwitchTabs                                                              *******/
+/****************  Buttons                                                                 *******/
 /*************************************************************************************************/
 
-public boolean switchToTab( Tab aTab ) {
-  
-  if ( aTab == tabDetails ) {
-    if ( g_config != null ) { 
-      CurrentTabMode = TAB_DETAILS;
-      tabDetails.setActive(true);
-
-      tabDefault.setActive(false);
-      return true;
-    }
-  } else if ( aTab == tabDefault ) {
-      CurrentTabMode = TAB_DEFAULT;
-      tabDefault.setActive(true);
-
-      tabDetails.setActive(false);
-      return true;
-  }
-
-  return false;
-}
-
-
-
-
-/*************************************************************************************************/
-/****************  Central Event Handler and Buttons                                       *******/
-/*************************************************************************************************/
-
-
-/*************************************************************************************************/
-void controlEvent(ControlEvent theEvent) {
-  // DropdownList is of type ControlGroup.
-  // A controlEvent will be triggered from inside the ControlGroup class.
-  // therefore you need to check the originator of the Event with
-  // if (theEvent.isGroup())
-  // to avoid an error message thrown by controlP5.
-
-  if (theEvent.isGroup()) {
-    // Check if Event was triggered from drpSection
-    if ( theEvent.getGroup().equals( drpSection ) ) {
-      println("  event from drpSection ");
-      updateSection((int(theEvent.getGroup().getValue())));     
-    } else     if ( theEvent.getGroup().equals( drpGroup ) ) {
-      println("  event from drpGroup ");
-      updateGroup((int(theEvent.getGroup().getValue())));     
-    } else     if ( theEvent.getGroup() instanceof SelectListBox ) {
-      println("  event from lstEntryName ");
-      updateEntry((int(theEvent.getGroup().getValue())));     
-    }
-
-    println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
-  } else if (  ( theEvent.getController() instanceof Toggle) ) {  
-    if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togShowOnlyActive ) ) ) { 
-      updateToggle((Toggle) theEvent.getController());
-    } else if ( ( theEvent.getController().equals( togNoValue ) )  ) { 
-      updateToggleNoValue();
-    }
-  }
-
-}
 
 /*************************************************************************************************/
 public void btnWriteFull(int theValue) {
@@ -111,6 +47,9 @@ public void btnWriteMinimal(int theValue) {
 
 /*************************************************************************************************/
 public void updateToggleNoValue() {
+  
+  if (drpSection == null ) 
+    return;
   ConfSection cs = g_config.get(drpSection.getId());
   ConfGroup cg = cs.get(drpGroup.getId());
   
@@ -141,8 +80,6 @@ public void updateToggle(Toggle aToggle) {
 
 
 /*************************************************************************************************/
-/************* newId -1 means just refresh the UI */
-/************* newId -2 means just refresh the UI and do not promote to subsequent controls */
 public void updateConfig(Config aConfig) {
 
   isUpdateEnabled = false;
@@ -179,8 +116,11 @@ public void updateSection(int newId) {
       finalizeEdit( false );
     }
     drpSection.setId( newId );
+    drpSection.setActiveValue(newId);
   }
 
+  if (drpSection == null ) 
+    return;
   isUpdateEnabled = false;
   ConfSection cs = g_config.get(drpSection.getId());
   drpGroup.setIndex(0);
@@ -217,6 +157,7 @@ public void updateGroup(int newId) {
       finalizeEdit( false );
     }
     drpGroup.setId( newId );
+    drpGroup.setActiveValue(newId);
   }
 
   ConfSection cs = g_config.get(drpSection.getId());
