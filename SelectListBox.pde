@@ -105,6 +105,7 @@ public class SelectListBox extends ListBox {
   protected CColor actColor;
  
   protected boolean isDep = false;
+  protected boolean isActiveSync = true;
 
   SelectListBox(ControlP5 cp5, String theName) {
     super(cp5, theName); 
@@ -143,6 +144,12 @@ public class SelectListBox extends ListBox {
   }
 
 
+  public SelectListBox setActiveSync(boolean aVal) {
+    isActiveSync = aVal;
+    return this;
+  }
+
+
   public SelectListBox setActiveValue( float actValue ) {
     for (int i = 0; i < items.size(); i++) {
       if ( (items.get(i)).getValue() == _myActiveValue ) {
@@ -161,7 +168,11 @@ public class SelectListBox extends ListBox {
 //      println("scroll position " + _myScrollValue + " / " + itemOffset);
       SelectListBox anSLB = ((SelectListBox) otherBoxes.get(i) );
       anSLB.isDep = true;
-      anSLB.setActiveValue( _myActiveValue );
+      if ( isActiveSync ) {
+        anSLB.setActiveValue( _myActiveValue );
+      } else {
+        anSLB.setActiveValue( -1 );
+      }
       anSLB.isDep = false;
     }
   }    

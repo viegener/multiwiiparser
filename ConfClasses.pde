@@ -4,7 +4,6 @@
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
-
 /*************************************************************************************************/
 /**************** ConfObject                                                               *******/
 /*************************************************************************************************/
@@ -794,3 +793,99 @@ class Config extends ConfObject {
     return al;
   }
 }
+
+
+
+
+/*************************************************************************************************/
+/**************** DeltaEntry                                                               *******/
+/*************************************************************************************************/
+class DeltaEntry {
+  protected String mName;
+  protected ConfEntry mLCE, mRCE;
+  protected boolean mBoth = false;
+  protected boolean mEquals = false;
+  
+  /************** ConfObject ************************/
+  DeltaEntry( ConfEntry aLeft, ConfEntry aRight ) {
+    mLCE = aLeft;
+    mRCE = aRight;
+
+    if (( mLCE != null ) && ( mRCE != null) ) {
+      mBoth = true;
+    }
+    
+    // Compare equal
+    if ( mBoth ) {
+        if ( mLCE.getName().equals( mRCE.getName() ) ) {
+          if ( mLCE.isActive() == mRCE.isActive() ) {
+            if ( ( ! mLCE.hasValue() ) || ( mLCE.getValue().equals( mRCE.getValue() )  ) ) {
+              mEquals = true;
+            }
+          }
+        }
+    }
+
+    // get Name
+    if ( mLCE != null ) {
+      mName = mLCE.getName(); 
+    } else {
+      mName = mRCE.getName(); 
+    }
+    
+  }
+
+
+  /************** getName ************************/
+  String getName() {
+    return mName;
+  }
+
+  /************** hasBoth ************************/
+  boolean isEqual() {
+    return ( mEquals );
+  }
+
+  /************** hasBoth ************************/
+  boolean hasBoth() {
+    return ( mBoth );
+  }
+
+  /************** hasLeft ************************/
+  boolean hasLeft() {
+    return ( mLCE != null );
+  }
+
+  /************** getLeft ************************/
+  ConfEntry getLeft() {
+    return mLCE;
+  }
+
+  /************** getDNameLeft ************************/
+  String getDNameLeft() {
+    return mLCE.getDisplayName();
+  }
+
+  /************** hasLeft ************************/
+  boolean hasRight() {
+    return ( mRCE != null );
+  }
+
+  /************** getDNameRight ************************/
+  String getDNameRight() {
+    return mRCE.getDisplayName();
+  }
+
+  /************** getRight ************************/
+  ConfEntry getRight() {
+    return mRCE;
+  }
+
+
+
+
+
+}
+
+
+

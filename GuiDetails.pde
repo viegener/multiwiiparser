@@ -90,7 +90,7 @@ public void updateConfig(Config aConfig) {
   g_config = aConfig;
   txfFilename.setText( g_config.getName() );
   
-  switchToTab( tabDetails );
+  updateTab( tabDetails );
   drpSection.addItems( g_config.getDisplayNames() );
   drpSection.setIndex(0);
 }

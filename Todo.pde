@@ -6,36 +6,37 @@
 
 
 static final String MWP_VERSION = "0.3 pre";
-static final String MWP_REVISION = "2013/04/02"; 
+static final String MWP_REVISION = "2013/04/03"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
 
 /***************** TODO **********************************************************
+- DELTA: Show only different
+- DELTA: Show only different ones that are active
+
 - add difference viewer (in separate tab?) : Two coupled list boxes / green for added-red for removed/add empty lines 
 - allow selection of section in diff viewer
 - add keys to textfield --> Posi, End, Ctrl-C, Ctrl-V (Copy past allow copying pasting full current field)
 
-* USECASE 3 - Open two different config.h and show the differences
-    -- TODO: Show the delta
-  
-* USECASE 4 - Open a config.h (as a template) and apply another config to it
+* USECASE 4 - Apply modifications in delta list into config.h
     -- TODO: Apply changes to a config.h including check fo compliance
     -- TODO: Deactivate other entries if necessary (based on Groups)
 
 * USECASE 5 - Handle a persistent catalog for config files
     -- Show current filename
-    -- TODO: Show last filenames used
+    -- TODO: Show last filenames used or favories
     -- TODO: Assign a name for a filename
     -- TODO: Apply a filename into a multiwii directory
     -- TODO: Start arduino software for multiwii
     -- TODO: Validate also if Board and COM-Port can be changed beforehand
     
+* USECASE 6 - Open a config.h (as a template) and apply another config to it
+    -- TODO: Apply changes to a config.h including check fo compliance
+    -- TODO: Deactivate other entries if necessary (based on Groups)
+
 --------------------------------
 
-- TextField should allow Pos1/End
-- TextField should allow Copy/Paste
-- event output bound to debug setting
 - Add javadoc
 - Allow search for entries
 
@@ -45,6 +46,7 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 - Allow resorting of entries in a group
 - show count of entries in label for droplist
 - Background of drop down should be blanked and not shine through
+- cleanup debug handling: e.g. - event output bound to debug setting
 
 =======================================================================================
 DONE:
@@ -53,6 +55,8 @@ DONE:
 - File selection in Default tab
 - New tab for compare
 - Prepared compare with lists and additional file selecction
+- DELTA: Select entry (either left or right)
+- DELTA: Show details (either left or right)
 
 
 31.3.2013
@@ -182,6 +186,9 @@ DONE:
     -- Check activation is not creating incompleteness
     -- If entries are changed and cancel / new selection ==> Ask for Save or Cancel
     
+* USECASE 3 - Open two different config.h and show the differences
+    -- Show the delta
+  
 -------------------------------------
 
 

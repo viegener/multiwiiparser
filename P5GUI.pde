@@ -16,7 +16,7 @@ import controlP5.*;
 ControlP5 cp5;
 
 Label dummyLabel;
-
+Tab lastTab;
 
 /***************************/
 
@@ -34,7 +34,6 @@ SelectListBox lstEntryComm;
 InToggle togAll;
 InToggle togShowOnlyActive;
 
-InToggle togEntryActive;
 
 InToggle togNoValue;
 InToggle togSameName;
@@ -42,6 +41,8 @@ InToggle togSameName;
 LTextfield txfName;
 LTextfield txfValue;
 LTextfield txfComment;
+InToggle togEntryActive;
+
 InToggle togSetActive;
 
 Button btnWriteMinimal;
@@ -140,14 +141,17 @@ public void initializeGUI() {
 //   .setColorLabel(color(255))
 //   .setColorActive(color(255,128,0))
    .setId(2)
+   .activateEvent( true )
    ;
 
 
   tabCompare = cp5.getTab("compare")
      .setLabel("  Compare  ")
      .setId(3)
+     .activateEvent( true )
      ;
 
+  lastTab = tabDetails;
 
   /***********************************/
   /********* DETAILS *****************/
@@ -450,6 +454,7 @@ public void initializeGUI() {
 
   lstEntryLeft = new SelectListBox( cp5, "lstEntryLeft" );
   lstEntryLeft.setLabelText("Entry   ")
+         .setActiveSync( false )
          .setPosition(LeftXPos, GroupYPos)
          .setSize(300, 260)
          .setItemHeight(15)
@@ -467,14 +472,16 @@ public void initializeGUI() {
 
   lstEntryInfo = new SelectListBox( cp5, "lstEntryInfo" );
   lstEntryInfo.setLabelText("")
+         .setActiveSync( false )
          .setPosition(MiddleXPos+5, GroupYPos)
          .setSize(30, 260)
          .setItemHeight(15)
          .setBarHeight(15)
          .setScrollbarWidth(0)
          .setScrollbarVisible( true )
+         .setScrollbarWidth(0)
          .actAsPulldownMenu( false )
-         .setUpdate( true )
+         .setUpdate( false )
          .hideBar()
          .setColorBackground(color(255, 20))
          .setColorActive(color(0))
@@ -484,6 +491,7 @@ public void initializeGUI() {
 
   lstEntryRight = new SelectListBox( cp5, "lstEntryRight" );
   lstEntryRight.setLabelText("")
+         .setActiveSync( false )
          .setPosition(RightXPos, GroupYPos)
          .setSize(300, 260)
          .setItemHeight(15)
@@ -495,6 +503,7 @@ public void initializeGUI() {
          .setColorBackground(color(255, 20))
          .setColorActive(color(0))
          .setColorForeground(color(255, 100,0))
+         .moveTo( tabCompare )
          ;
 
   ArrayList arrSLB2 = new ArrayList();
@@ -511,7 +520,6 @@ public void initializeGUI() {
   /***********************************/
   /*********  *****************/
   /***********************************/
-
 
   // add mousewheel support, now hover the slide with your mouse
   // and use the mousewheel (or trackpad on a macbook) to change the 
@@ -544,11 +552,6 @@ void addMouseWheelListener() {
 
 /*************************************************************************************************/
 void controlEvent(ControlEvent theEvent) {
-  // DropdownList is of type ControlGroup.
-  // A controlEvent will be triggered from inside the ControlGroup class.
-  // therefore you need to check the originator of the Event with
-  // if (theEvent.isGroup())
-  // to avoid an error message thrown by controlP5.
 
   if (theEvent.isGroup()) {
     // Check if Event was triggered from drpSection
@@ -559,11 +562,16 @@ void controlEvent(ControlEvent theEvent) {
       println("  event from drpGroup ");
       updateGroup((int(theEvent.getGroup().getValue())));     
     } else     if ( theEvent.getGroup() instanceof SelectListBox ) {
-      println("  event from lstEntryName ");
-      updateEntry((int(theEvent.getGroup().getValue())));     
+      println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
+      if ( theEvent.getGroup().getTab() == tabCompare ) {
+        updateDeltaEntry((SelectListBox) theEvent.getGroup(), (int(theEvent.getGroup().getValue())));     
+      } else {
+        updateEntry((int(theEvent.getGroup().getValue())));     
+      }
     }
-
-    println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
+  } else if ( theEvent.isTab()  ) {  
+      println("event from tab ");
+      updateTab(  theEvent.getTab() );
   } else if (  ( theEvent.getController() instanceof Toggle) ) {  
     if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togShowOnlyActive ) ) ) { 
       updateToggle((Toggle) theEvent.getController());
@@ -575,38 +583,50 @@ void controlEvent(ControlEvent theEvent) {
 }
 
 /*************************************************************************************************/
+/****************  makeTabReady                                                              *******/
+/*************************************************************************************************/
+
+public void makeTabReady( Tab aTab ) {
+
+  if ( ( aTab == tabDetails ) || ( aTab == tabCompare ) ) {
+    txfName.moveTo( aTab );
+    txfValue.moveTo( aTab );
+    txfComment.moveTo( aTab );
+    togEntryActive.moveTo( aTab );
+    if ( aTab == tabDetails ) {
+      updateEntry(-1);
+    } else {
+      updateEntry(-1);
+    }
+  }
+
+}
+
+/*************************************************************************************************/
 /****************  SwitchTabs                                                              *******/
 /*************************************************************************************************/
 
-public boolean switchToTab( Tab aTab ) {
-  
-  if ( aTab == tabDetails ) {
-    if ( g_config != null ) { 
-      CurrentTabMode = TAB_DETAILS;
-      tabDetails.setActive(true);
+public void updateTab( Tab aTab ) {
 
-      tabDefault.setActive(false);
-      tabCompare.setActive(false);
-      return true;
-    }
-  } else if ( aTab == tabDefault ) {
-      CurrentTabMode = TAB_DEFAULT;
-      tabDefault.setActive(true);
-
-      tabDetails.setActive(false);
-      tabCompare.setActive(false);
-      return true;
-  } else if ( aTab == tabCompare ) {
-      CurrentTabMode = TAB_COMPARE;
-      tabCompare.setActive(true);
-
-      tabDefault.setActive(false);
-      tabDetails.setActive(false);
-      return true;
+  if ( ( aTab == tabCompare ) && ( ! tabCompareIsReady() ) ) {
+    aTab = lastTab;
   }
 
-  return false;
+  if ( aTab == tabDetails ) {
+    CurrentTabMode = TAB_DETAILS;
+  } else if ( aTab == tabDefault ) {
+    CurrentTabMode = TAB_DEFAULT;
+  } else if ( aTab == tabCompare ) {
+    CurrentTabMode = TAB_COMPARE;
+  }
+
+  aTab.bringToFront();
+  lastTab = aTab;
+
+  makeTabReady( lastTab );
 }
+
+
 
 /*************************************************************************************************/
 /****************  Default buttons                                                              *******/
@@ -617,6 +637,7 @@ public void btnSelectFile(int theValue) {
   Config aConfig = readAConfig();
 
   if ( aConfig != null ) {
+    g_CompConfig = null;
     updateConfig( aConfig );
   }
 }
