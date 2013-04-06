@@ -17,8 +17,23 @@ ControlP5 cp5;
 
 Label dummyLabel;
 Tab lastTab;
+boolean isUpdateEnabled = true;
+boolean isCurrentlyDoubleClick;
 
 /***************************/
+
+
+Tab tabDefault;
+Tab tabDetails;
+Tab tabCompare;
+
+static final int TAB_DETAILS = 1;
+static final int TAB_DEFAULT = 2;
+static final int TAB_COMPARE = 3;
+
+int CurrentTabMode = 0;
+
+/*************************************************************************************************/
 
 LDropdownList  drpSection;
 LDropdownList  drpGroup;
@@ -60,11 +75,18 @@ Textfield txfCompareFile;
 
 Button btnAddToFavorites;
 Button btnSelectFile;
+Button btnCleanFile;
 
 Button btnCompAddToFavorites;
 Button btnSelectCompFile;
+Button btnCleanCompFile;
 
+SelectListBox lstFilePath;
+SelectListBox lstFileName;
+SelectListBox lstFileComm;
 
+Button btnFileRemove;
+Button btnFileSave;
 
 /***************************/
 
@@ -72,21 +94,15 @@ SelectListBox lstEntryLeft;
 SelectListBox lstEntryInfo;
 SelectListBox lstEntryRight;
 
+InToggle togCompareDiff;
+InToggle togCompareActive;
+
+LDropdownList  drpLCSection;
+LDropdownList  drpRCSection;
+
 /***************************/
 
 CColor notrans;
-
-/*************************************************************************************************/
-
-Tab tabDefault;
-Tab tabDetails;
-Tab tabCompare;
-
-static final int TAB_DETAILS = 1;
-static final int TAB_DEFAULT = 2;
-static final int TAB_COMPARE = 3;
-
-int CurrentTabMode = 0;
 
 /*************************************************************************************************/
 
@@ -116,7 +132,7 @@ public void initializeGUI() {
   int ControlXPos = 92;
   int AdditionalXPos = 630;
 
-  int SectionYPos = 40;
+  int SectionYPos = 30;
   int GroupYPos = 80;
   int EntryYPos = 200;
   int DetailYPos = 340;
@@ -127,12 +143,15 @@ public void initializeGUI() {
   dummyLabel = new Label( cp5, "");
   dummyLabel.hide();
 
+  isUpdateEnabled = false;
+
   /*********************/
   /* Tabs */
   
   tabDefault = cp5.getTab("default")
-     .setLabel("  File Store  ")
+     .setLabel("  File  ")
      .setId(1)
+     .activateEvent( true )
      ;
 
   tabDetails = cp5.addTab("details")
@@ -146,7 +165,7 @@ public void initializeGUI() {
 
 
   tabCompare = cp5.getTab("compare")
-     .setLabel("  Compare  ")
+     .setLabel("  Compare Configurations ")
      .setId(3)
      .activateEvent( true )
      ;
@@ -245,33 +264,37 @@ public void initializeGUI() {
   lstEntryComm.addOthers( arrSLB );
 
   /******** TOGGLE for Group properties */
-  togNoValue = new InToggle( cp5, "NO Value");
+  togNoValue = new InToggle( cp5, "togNoValue");
   togNoValue.setPosition(AdditionalXPos,EntryYPos-40 )
      .setSize(60,20)
      .setValue(false)
+     .setCaptionLabel("NO Value")
      .moveTo( tabDetails )
      ;
 
-  togSameName = new InToggle( cp5, "=Name");
+  togSameName = new InToggle( cp5, "togSameName");
   togSameName.setPosition(AdditionalXPos+togNoValue.getWidth()+10,EntryYPos-40 )
      .setSize(50,20)
      .setValue(false)
      .lock()
+     .setCaptionLabel("=Name")
      .moveTo( tabDetails )
      ;
 
   /******** TOGGLE for Special displays */
-  togAll = new InToggle( cp5, "Show All");
+  togAll = new InToggle( cp5, "togAll");
   togAll.setPosition(AdditionalXPos,SectionYPos-(pfont_height+4) )
      .setSize(60,20)
      .setValue(false)
+     .setCaptionLabel("Show All")
      .moveTo( tabDetails )
      ;
 
-  togShowOnlyActive = new InToggle( cp5, "Only Active");
+  togShowOnlyActive = new InToggle( cp5, "togShowOnlyActive");
   togShowOnlyActive.setPosition(AdditionalXPos+togAll.getWidth()+20,SectionYPos -(pfont_height+4))
      .setSize(70,20)
      .setValue(false)
+     .setCaptionLabel("Only Active")
      .moveTo( tabDetails )
      ;
      
@@ -295,7 +318,6 @@ public void initializeGUI() {
      .lock()
      .moveTo( tabDetails )
      ;
-
 
   txfValue = new LTextfield( cp5, "txfValue" );
   txfValue.setPosition(ControlXPos, DetailYPos+22)
@@ -413,6 +435,13 @@ public void initializeGUI() {
      .moveTo( tabDefault )
      ;
 
+  btnCleanFile = cp5.addButton("btnCleanFile")
+     .setPosition(ControlXPos + btnAddToFavorites.getWidth() + 10 + btnSelectFile.getWidth() + 10,SectionYPos + 30)
+     .setSize(100,20)
+     .setCaptionLabel( "   Clear " )
+     .moveTo( tabDefault )
+     ;
+
   /************** Compare ********/
   txfCompareFile = new LTextfield( cp5, "txfCompareFile" );
   txfCompareFile.setPosition(ControlXPos, SectionYPos+70)
@@ -436,6 +465,87 @@ public void initializeGUI() {
      .setPosition(ControlXPos + btnAddToFavorites.getWidth() + 10,SectionYPos + 30+70)
      .setSize(120,20)
      .setCaptionLabel( "   Select File" )
+     .moveTo( tabDefault )
+     ;
+
+  btnCleanCompFile = cp5.addButton("btnCleanCompFile")
+     .setPosition(ControlXPos + btnAddToFavorites.getWidth() + 10 + btnSelectCompFile.getWidth() + 10,SectionYPos + 30+70)
+     .setSize(100,20)
+     .setCaptionLabel( "   Clear " )
+     .moveTo( tabDefault )
+     ;
+
+  lstFilePath = new SelectListBox( cp5, "lstFilePath" );
+  lstFilePath.setLabelText("Favorites   ")
+         .setPosition(ControlXPos, EntryYPos-(pfont_height+4))
+         .setSize(307, 150)
+         .setItemHeight(15)
+         .setBarHeight(15)
+         .setScrollbarVisible( true )
+         .setScrollbarWidth(0)
+         .actAsPulldownMenu( false )
+         .setUpdate( true )
+         .hideBar()
+         .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+         .setColorForeground(color(255, 100,0))
+         .moveTo( tabDefault )
+         ;
+
+  lstFileName = new SelectListBox( cp5, "lstFileName" );
+        ((ListBox) lstFileName)
+         .setPosition(ControlXPos+lstFilePath.getWidth()+5, EntryYPos-(pfont_height+4))
+         .setSize(100, 150)
+         .setItemHeight(15)
+         .setBarHeight(15)
+         .setScrollbarWidth(0)
+         .setScrollbarVisible( true )
+         .actAsPulldownMenu( false )
+         .setUpdate( true )
+         .hideBar()
+         .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+         .setColorForeground(color(255, 100,0))
+         .moveTo( tabDefault )
+         ;
+
+  lstFileComm = new SelectListBox( cp5, "lstFileComm" );
+        ((ListBox) lstFileComm)
+         .setPosition(ControlXPos+lstFilePath.getWidth()+5+lstFileName.getWidth()+5, EntryYPos-(pfont_height+4))
+         .setSize(250, 150)
+         .setItemHeight(15)
+         .setBarHeight(15)
+         .setScrollbarVisible( true )
+         .actAsPulldownMenu( false )
+         .setUpdate( true )
+         .hideBar()
+         .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+         .setColorForeground(color(255, 100,0))
+         .moveTo( tabDefault )
+         ;
+
+  arrSLB = new ArrayList();
+  arrSLB.add( lstFilePath );
+  arrSLB.add( lstFileName );
+  arrSLB.add( lstFileComm );
+  
+  lstFilePath.addOthers( arrSLB );
+  lstFileName.addOthers( arrSLB );
+  lstFileComm.addOthers( arrSLB );
+
+  /******** Buttons */
+  btnFileSave = cp5.addButton("btnFileSave")
+     .setPosition(ControlXPos,ButtonYPos)
+     .setSize(120,20)
+     .setCaptionLabel( "   Save Favorites" )
+     .moveTo( tabDefault )
+     ;
+
+  btnFileRemove = cp5.addButton("btnFileRemove")
+     .setPosition(ControlXPos + btnFileSave.getWidth() + 50,ButtonYPos)
+     .setSize(80,20)
+     .setCaptionLabel( "   Remove" )
      .moveTo( tabDefault )
      ;
 
@@ -474,7 +584,7 @@ public void initializeGUI() {
   lstEntryInfo.setLabelText("")
          .setActiveSync( false )
          .setPosition(MiddleXPos+5, GroupYPos)
-         .setSize(30, 260)
+         .setSize(40, 260)
          .setItemHeight(15)
          .setBarHeight(15)
          .setScrollbarWidth(0)
@@ -516,6 +626,45 @@ public void initializeGUI() {
   lstEntryRight.addOthers( arrSLB2 );
 
 
+  /******** TOGGLE for Special displays */
+  drpLCSection = new LDropdownList( cp5, "drpLCSection", LeftXPos, GroupYPos, 300, 100);
+  drpLCSection.setLabelText( "Section " )
+     .setBarHeight( pfont_height+4 )
+     .moveTo( tabCompare )
+     .setBackgroundColor(color(0,0))
+     .setColorBackground(color(255, 20))
+     .setColorActive(color(0))
+     .setColorForeground(color(255, 100,0))
+        ; 
+
+  drpRCSection = new LDropdownList( cp5, "drpRCSection", RightXPos, GroupYPos, 300, 100);
+  drpRCSection.setLabelText( "" )
+     .setBarHeight( pfont_height+4 )
+     .moveTo( tabCompare )
+     .setBackgroundColor(color(0,0))
+     .setColorBackground(color(255, 20))
+     .setColorActive(color(0))
+     .setColorForeground(color(255, 100,0))
+        ; 
+
+
+  /******** TOGGLE for Special displays */
+  togCompareDiff = new InToggle( cp5, "togCompareDiff");
+  togCompareDiff.setPosition(AdditionalXPos,SectionYPos-(pfont_height+4) )
+     .setSize(80,20)
+     .setValue(false)
+     .setCaptionLabel("Only Different")
+     .moveTo( tabCompare )
+     ;
+
+  togCompareActive = new InToggle( cp5, "togCompareActive");
+  togCompareActive.setPosition(AdditionalXPos+togCompareDiff.getWidth()+10,SectionYPos -(pfont_height+4))
+     .setSize(80,20)
+     .setValue(false)
+     .setCaptionLabel("Only Active")
+     .moveTo( tabCompare )
+     ;
+     
 
   /***********************************/
   /*********  *****************/
@@ -525,6 +674,8 @@ public void initializeGUI() {
   // and use the mousewheel (or trackpad on a macbook) to change the 
   // value of the slider.   
   addMouseWheelListener();
+
+  isUpdateEnabled = true;
 
 //  grpSelectors.hide();
 
@@ -561,12 +712,17 @@ void controlEvent(ControlEvent theEvent) {
     } else     if ( theEvent.getGroup().equals( drpGroup ) ) {
       println("  event from drpGroup ");
       updateGroup((int(theEvent.getGroup().getValue())));     
-    } else     if ( theEvent.getGroup() instanceof SelectListBox ) {
+    } else if ( ( theEvent.getGroup().equals( drpLCSection ) ) || ( theEvent.getGroup().equals( drpRCSection ) ) ) {
+      println("  event from drpL/RCSection ");
+      updateCompSection((LDropdownList) theEvent.getGroup(), (int(theEvent.getGroup().getValue())));     
+    } else if (theEvent.getGroup() instanceof SelectListBox ) {
       println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
       if ( theEvent.getGroup().getTab() == tabCompare ) {
         updateDeltaEntry((SelectListBox) theEvent.getGroup(), (int(theEvent.getGroup().getValue())));     
-      } else {
+      } else if ( theEvent.getGroup().getTab() == tabDetails ) {
         updateEntry((int(theEvent.getGroup().getValue())));     
+      } else {
+        updateFavEntry((int(theEvent.getGroup().getValue())));
       }
     }
   } else if ( theEvent.isTab()  ) {  
@@ -575,6 +731,8 @@ void controlEvent(ControlEvent theEvent) {
   } else if (  ( theEvent.getController() instanceof Toggle) ) {  
     if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togShowOnlyActive ) ) ) { 
       updateToggle((Toggle) theEvent.getController());
+    } else if  ( ( theEvent.getController().equals( togCompareActive ) ) || ( theEvent.getController().equals( togCompareDiff ) ) ) { 
+      updateCompToggle((Toggle) theEvent.getController());
     } else if ( ( theEvent.getController().equals( togNoValue ) )  ) { 
       updateToggleNoValue();
     }
@@ -589,15 +747,15 @@ void controlEvent(ControlEvent theEvent) {
 public void makeTabReady( Tab aTab ) {
 
   if ( ( aTab == tabDetails ) || ( aTab == tabCompare ) ) {
-    txfName.moveTo( aTab );
     txfValue.moveTo( aTab );
-    txfComment.moveTo( aTab );
     togEntryActive.moveTo( aTab );
-    if ( aTab == tabDetails ) {
-      updateEntry(-1);
-    } else {
-      updateEntry(-1);
-    }
+  }
+  txfName.moveTo( aTab );
+  txfComment.moveTo( aTab );
+  if ( aTab == tabDetails ) {
+    updateEntry(-1);
+  } else if ( aTab == tabCompare ) {
+    updateDeltaEntry(null,-1);
   }
 
 }
@@ -610,6 +768,10 @@ public void updateTab( Tab aTab ) {
 
   if ( ( aTab == tabCompare ) && ( ! tabCompareIsReady() ) ) {
     aTab = lastTab;
+  }
+
+  if ( ( aTab == tabDetails ) && ( ! tabDetailsIsReady() ) ) {
+    aTab = tabDefault;
   }
 
   if ( aTab == tabDetails ) {
@@ -627,28 +789,5 @@ public void updateTab( Tab aTab ) {
 }
 
 
-
-/*************************************************************************************************/
-/****************  Default buttons                                                              *******/
-/*************************************************************************************************/
-
-/*************************************************************************************************/
-public void btnSelectFile(int theValue) {
-  Config aConfig = readAConfig();
-
-  if ( aConfig != null ) {
-    g_CompConfig = null;
-    updateConfig( aConfig );
-  }
-}
-
-/*************************************************************************************************/
-public void btnSelectCompFile(int theValue) {
-  Config aConfig = readAConfig();
-
-  if ( aConfig != null ) {
-    updateCompConfig( aConfig );
-  }
-}
 
 

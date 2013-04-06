@@ -6,27 +6,31 @@
 
 
 static final String MWP_VERSION = "0.3 pre";
-static final String MWP_REVISION = "2013/04/03"; 
+static final String MWP_REVISION = "2013/04/06"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
 
 /***************** TODO **********************************************************
-- DELTA: Show only different
-- DELTA: Show only different ones that are active
+- FILE: start empty
+- FILE: allow comment (use edit fields)
+- FILE: Auto save of Favorites??
 
-- add difference viewer (in separate tab?) : Two coupled list boxes / green for added-red for removed/add empty lines 
-- allow selection of section in diff viewer
-- add keys to textfield --> Posi, End, Ctrl-C, Ctrl-V (Copy past allow copying pasting full current field)
+- DELTA: COlor the change
+- DELTA: Allow selection of single section for comparision
+
+- DELTA and DETAILS: Check for unsaved modifications
 
 * USECASE 4 - Apply modifications in delta list into config.h
-    -- TODO: Apply changes to a config.h including check fo compliance
+    -- TODO: Apply changes to a config.h (esp. haveSameName / noValue)
+    -- TODO: check for compliance on changes
     -- TODO: Deactivate other entries if necessary (based on Groups)
 
 * USECASE 5 - Handle a persistent catalog for config files
     -- Show current filename
-    -- TODO: Show last filenames used or favories
-    -- TODO: Assign a name for a filename
+    -- Show last filenames used or favories
+    -- TODO: Assign a comment for a filename
+    -- TODO: Define and display a multiwii directory
     -- TODO: Apply a filename into a multiwii directory
     -- TODO: Start arduino software for multiwii
     -- TODO: Validate also if Board and COM-Port can be changed beforehand
@@ -47,9 +51,27 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 - show count of entries in label for droplist
 - Background of drop down should be blanked and not shine through
 - cleanup debug handling: e.g. - event output bound to debug setting
+- beautify the UI: Colors, Fields aligned, 
+- DELTA: Show filename
 
 =======================================================================================
 DONE:
+06.04.2013
+- FILE: remove favorite
+- FILE: Save/Load favorites
+- FILE: show comment and file in details
+- FILE: select file from fav list onto next available file slot
+- FILE: allow clearance of files (new buttons)
+- FILE: Add to favorites list
+- Add favorites lists (Path / file / comment)
+- add keys to textfield --> Posi, End, Ctrl-C, Ctrl-V (Copy past allow copying pasting full current field)
+--    needed to completely rebuild LTextField due to visibility issues in TextField
+- DELTA: Show only different
+- DELTA: Show only different ones that are active
+- DELTA: SHow Section and update based on selection 
+- DELTA: no selection in section dropdown
+
+
 03.4.2013
 - Colors in Dropdown adapted / better visible
 - File selection in Default tab
@@ -65,8 +87,6 @@ DONE:
 - Move from Toggle to InToggle
 - In dropdownlistbox active entry should be marked and rest of th elist should be grey (as in List)
 - DEFECT: DropDown texts might be too long and need to be cutted
-
-30.3.2013
 - minimal config can also be reloaded
 - minimal config has normal sections
 - added tabs for file and details
@@ -188,6 +208,7 @@ DONE:
     
 * USECASE 3 - Open two different config.h and show the differences
     -- Show the delta
+    -- Show only different ones that are active
   
 -------------------------------------
 

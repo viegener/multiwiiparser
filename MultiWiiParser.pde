@@ -35,76 +35,6 @@ boolean isDebug( int level ) {
    
 /*************************************************************************************************/
 /*****************                                                                 ***************/
-/****************  File selection                                            *******/
-/*****************                                                                 ***************/
-/*************************************************************************************************/
-
-
-Config readAConfig( ) {
-  Config config = null;
-  
-  if ( isDebug( DEBUG_FIXED_FILE ) ) {
-    println("Fixed file");
-    g_file = new File("test\\config.h");
-  } else {
-    g_file = null;
-    isFileSelected = false;
-    selectInput( "Select a config.h file", "fileSelected" );
-
-    // wait for file selected (ouch)
-    while ( ! isFileSelected ) {
-      delay(200);
-    }
-  }
-  
-  if ( ! ( g_file == null ) ) {
-    config = parseConfig(g_file.getAbsolutePath() );
-  }
-  
-  return config;
-}
-
-
-
-
-void writeAConfig( boolean doMinimal ) {
-  
-  g_file = null;
-  
-  String prpart = "";
-  if ( doMinimal ) {
-      prpart = " MINIMAL";
-  }
-
-  isFileSelected = false;
-  selectOutput( "Select an Output File to store" + prpart + " config file", "fileSelected" );
-
-  while ( ! isFileSelected ) {
-    delay(200);
-  }
-
-  if ( ! ( g_file == null ) ) {
-    String[] configText;
-    if ( doMinimal ) {
-      configText = (String[] ) g_config.getOutputText( doMinimal ).toArray( new String[] {} );
-    } else {
-      configText = (String[] ) g_config.getOriginalText().toArray( new String[] {} );
-    }
-  
-    saveStrings(g_file.getAbsolutePath(), configText );
-  }
-}
-
-
-
-void fileSelected( File aFile ) {
-  isFileSelected = true;
-  g_file = aFile;
-}
-
-   
-/*************************************************************************************************/
-/*****************                                                                 ***************/
 /****************  SETUP AND DRAW main routines                                            *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
@@ -112,7 +42,7 @@ void fileSelected( File aFile ) {
 
 void setup(){
 
-  Config aConfig = readAConfig();
+  Config aConfig = readAConfig(null);
 
   g_config = null;
 
@@ -120,7 +50,9 @@ void setup(){
     exit();
   } else {
     initializeGUI();
+    loadFavorites();
     updateConfig( aConfig );
+    updateFavorites( null );
     println("Ende Setup");
   }
 
@@ -130,6 +62,16 @@ void setup(){
 
 void draw() {
   background(128);
+}
+
+
+void mousePressed() {
+  isCurrentlyDoubleClick = (mouseEvent.getClickCount()%2 == 0);
+/*
+  if (mouseEvent.getClickCount()%2 == 0) {
+      println("DOuble click");
+  }
+*/
 }
 
 

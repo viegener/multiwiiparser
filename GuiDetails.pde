@@ -12,11 +12,14 @@ ArrayList CurrentCEList = new ArrayList();
 
 boolean isEditMode;
 boolean isCreateEditor = false;
-boolean isUpdateEnabled = true;
 
 /*********************************************************************************/
 
 Config g_config;
+
+public boolean tabDetailsIsReady() {
+ return ( g_config != null ); 
+}
 
 /*************************************************************************************************/
 
@@ -88,7 +91,10 @@ public void updateConfig(Config aConfig) {
   isUpdateEnabled = true;
   
   g_config = aConfig;
-  txfFilename.setText( g_config.getName() );
+  if ( aConfig == null ) {
+    updateTab( tabDefault );
+    return;
+  }
   
   updateTab( tabDetails );
   drpSection.addItems( g_config.getDisplayNames() );
@@ -314,11 +320,8 @@ public void updateCEList( ConfObject co, boolean blnActiveOnly ) {
 
   
   /*************************************************************************************************/
-public void updatelst(SelectListBox lstSel, boolean blnActiveOnly, int which) {
-  String[] texts;
-  ArrayList textList = new ArrayList();
-  
-
+public void updatelst(SelectListBox lstSel, boolean blnActiveOnly, int which) 
+{
   lstSel.beginItems();
   lstSel.setValue( 0 ).clear();
   for (int j = 0 ; j < CurrentCEList.size(); j++) {
@@ -327,8 +330,6 @@ public void updatelst(SelectListBox lstSel, boolean blnActiveOnly, int which) {
   }
 
   lstSel.endItems();
-  lstSel.setValue( drpGroup.getId() );
-
 }
 
 
@@ -342,31 +343,6 @@ String getEntryText( ConfEntry ce, int which ) {
     return ce.getLineComment();
   }
 } 
-
-
-
-
-/*************************************************************************************************/
-/*
-public void updateTxtList(String[] names ) {
-  String str = "";
-
-  if ( chkGlobal.getState(0) ) {
-    for( int i = 0; i<names.length; i++ ) {
-      str += names[i] + char(10);
-    }
-
-  } else {
-  
-    for( int i = 0; i<g_config.sortedNames.size(); i++ ) {
-      str += ((String) g_config.sortedNames.get(i)) + char(10);
-    }
-  }
-
-  txtList.setText(str);
-}
-*/
-
 
 
 /*************************************************************************************************/

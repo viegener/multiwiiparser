@@ -5,6 +5,29 @@
 /*************************************************************************************************/
 
 /*************************************************************************************************/
+/**************** GLOBALS                                                               *******/
+/*************************************************************************************************/
+
+  /************** areEntriesEqual ************************/
+  boolean areEntriesEqual( ConfEntry aLeft, ConfEntry aRight ) {
+    boolean equal = false;
+    
+    if ( ( aLeft == null ) || ( aRight == null ) ) {
+      return( aLeft == aRight );
+    }
+
+    if ( aLeft.getName().equals( aRight.getName() ) ) {
+      if ( aLeft.isActive() == aRight.isActive() ) {
+        if ( ( ! aLeft.hasValue() ) || ( aLeft.getValue().equals( aRight.getValue() )  ) ) {
+          equal = true;
+        }
+      }
+    }
+
+    return equal;
+  }
+  
+/*************************************************************************************************/
 /**************** ConfObject                                                               *******/
 /*************************************************************************************************/
 class ConfObject {
@@ -806,7 +829,7 @@ class DeltaEntry {
   protected boolean mBoth = false;
   protected boolean mEquals = false;
   
-  /************** ConfObject ************************/
+    /************** ConfObject ************************/
   DeltaEntry( ConfEntry aLeft, ConfEntry aRight ) {
     mLCE = aLeft;
     mRCE = aRight;
@@ -817,23 +840,22 @@ class DeltaEntry {
     
     // Compare equal
     if ( mBoth ) {
-        if ( mLCE.getName().equals( mRCE.getName() ) ) {
-          if ( mLCE.isActive() == mRCE.isActive() ) {
-            if ( ( ! mLCE.hasValue() ) || ( mLCE.getValue().equals( mRCE.getValue() )  ) ) {
-              mEquals = true;
-            }
-          }
-        }
+      mEquals = areEntriesEqual( mLCE, mRCE );
     }
 
     // get Name
     if ( mLCE != null ) {
       mName = mLCE.getName(); 
-    } else {
+    } else if ( mRCE != null ) {
       mName = mRCE.getName(); 
+    } else {
+      mName = "--"; 
     }
     
   }
+  
+  
+  
 
 
   /************** getName ************************/

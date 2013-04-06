@@ -4,29 +4,181 @@
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.util.Map; 
+import java.util.HashMap; 
+
+import processing.event.KeyEvent; 
+
+Object getFromClipboard(DataFlavor flavor)
+{
+  Clipboard clipboard = getToolkit().getSystemClipboard();
+  Transferable contents = clipboard.getContents(null);
+  Object obj = null;
+  if (contents != null && contents.isDataFlavorSupported(flavor)) {
+    try {
+      obj = contents.getTransferData(flavor);
+    }
+    catch (UnsupportedFlavorException exu) { // Unlikely but we must catch it 
+      println("Unsupported flavor: " + exu);
+      //~ exu.printStackTrace();
+    }
+    catch (java.io.IOException exi) {
+      println("Unavailable data: " + exi);
+      //~ exi.printStackTrace();
+    }
+  }
+  return obj;
+} 
+
+void putToClipboard(String text)
+{
+  Clipboard clipboard = getToolkit().getSystemClipboard();
+  StringSelection content = new StringSelection(text);
+
+  clipboard.setContents(content, null);
+
+}
+
+
+/*************************************************************************************************/
+/****************  Extended Textfield                                                      *******/
+/*************************************************************************************************/
+
+public class LTextfield extends Textfield {
+  
+   public static final int KEY_HOME = 36;
+   public static final int KEY_END = 35;
+  
+   protected Map<Integer, Boolean> myKeyMapping; 
+  
+   public LTextfield(ControlP5 theControlP5, String theName) {  
+    super( theControlP5, theName );
+    _myCaptionLabel.toUpperCase( false );
+    _myCaptionLabel.align(ControlP5.LEFT_OUTSIDE, ControlP5.CENTER); 
+
+
+    myKeyMapping = new HashMap<Integer, Boolean>();
+    // true for ctrl mapping
+    myKeyMapping.put(LEFT, false); 
+    myKeyMapping.put(RIGHT, false); 
+
+    myKeyMapping.put(KEY_HOME,false); 
+    myKeyMapping.put(KEY_END, false); 
+
+    myKeyMapping.put((int) 'C', true); 
+    myKeyMapping.put((int) 'V', true); 
+ 
+    }
+
+
+
+    public void keyEvent(KeyEvent theKeyEvent) {
+      boolean blnhandled = false;
+      if (isUserInteraction && isTexfieldActive && isActive && theKeyEvent.getAction() == KeyEvent.PRESS) {
+        println( "Key is pressed : " + theKeyEvent.getKeyCode() );
+        if ( ( theKeyEvent.isControlDown() ) && ( myKeyMapping.containsKey(theKeyEvent.getKeyCode())) && ( myKeyMapping.get(cp5.getKeyCode()).booleanValue() ) ) {
+//            println(" In Control handler");
+            blnhandled = true;
+            myKeyHandler( theKeyEvent );
+        } else if (myKeyMapping.containsKey(theKeyEvent.getKeyCode())) {
+//             println(" In key handler " + theKeyEvent.isControlDown() + " " + theKeyEvent.isAltDown() );
+            blnhandled = true;
+            myKeyHandler( theKeyEvent );
+        }
+      }
+
+      if ( ! blnhandled ) {
+        super.keyEvent( theKeyEvent );
+      }
+
+    }
+ 
+
+    
+    public void myKeyHandler( KeyEvent theKeyEvent ) {
+      switch ( theKeyEvent.getKeyCode() ) {
+        case 'C':
+          keyHandlerCopy(theKeyEvent);
+          break;
+        case 'P':
+          keyHandlerPaste(theKeyEvent);
+          break;
+        case LEFT:
+          keyHandlerLeft(theKeyEvent);
+          break;
+        case RIGHT:
+          keyHandlerRight(theKeyEvent);
+          break;
+          
+        case KEY_HOME:
+          keyHandlerHome(theKeyEvent);
+          break;
+        case KEY_END:
+          keyHandlerEnd(theKeyEvent);
+          break;
+      }
+    }
+
+    protected LTextfield mySetIndex( int theIndex ) {             
+      _myTextBufferIndex = theIndex;
+      changed = true;
+      return this;
+    } 
+
+    public void keyHandlerCopy(KeyEvent theKeyEvent ) {
+      if ( _myTextBuffer.length() > 0 ) {
+        String text = new String( _myTextBuffer );
+        putToClipboard( text );
+      }
+    }
+
+    public void keyHandlerPaste(KeyEvent theKeyEvent ) {
+      String text = (String) getFromClipboard(DataFlavor.stringFlavor);
+      if ( text != null ) {
+        _myTextBuffer = new StringBuffer( text );
+        mySetIndex(_myTextBuffer.length());             
+      }
+    }
+
+    public void keyHandlerHome(KeyEvent theKeyEvent ) {
+      mySetIndex(0);
+    }
+
+    public void keyHandlerEnd(KeyEvent theKeyEvent ) {
+      mySetIndex(_myTextBuffer.length());
+    }
+
+    public void keyHandlerLeft(KeyEvent theKeyEvent ) {
+      mySetIndex((theKeyEvent.isControlDown()) ? 0 : PApplet.max(0, _myTextBufferIndex - 1));
+    }
+
+    public void keyHandlerRight(KeyEvent theKeyEvent ) {
+      mySetIndex((theKeyEvent.isControlDown()) ? _myTextBuffer.length() : PApplet.min(_myTextBuffer.length(),
+                      _myTextBufferIndex + 1));
+    }
+
+}
+
+
 /*************************************************************************************************/
 /****************  Extended Controls with Label handled specific                           *******/
 /*************************************************************************************************/
 
 
 public class InToggle extends Toggle {
- 
    public InToggle(ControlP5 theControlP5, String theName) {  
     super( theControlP5, theName );
     _myCaptionLabel.toUpperCase( false );
     _myCaptionLabel.align(ControlP5.CENTER, ControlP5.CENTER); 
    }
+   
 }
 
-
-public class LTextfield extends Textfield {
- 
-   public LTextfield(ControlP5 theControlP5, String theName) {  
-    super( theControlP5, theName );
-    _myCaptionLabel.toUpperCase( false );
-    _myCaptionLabel.align(ControlP5.LEFT_OUTSIDE, ControlP5.CENTER); 
-   }
-}
 
 public class LDropdownList extends DropdownList {
  
