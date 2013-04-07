@@ -11,6 +11,16 @@ static final String[] dummylist = { "---" };
 
 /*************************************************************************************************/
 /*****************                                                                 ***************/
+/****************  Config                                                                  *******/
+/*****************                                                                 ***************/
+/*************************************************************************************************/
+
+public static final boolean CONFIG_AUTOSAVE_FAVORITES = true;
+public static final boolean CONFIG_START_WITH_FILESELECTION= false;
+
+
+/*************************************************************************************************/
+/*****************                                                                 ***************/
 /****************  debug                                                                   *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
@@ -20,6 +30,7 @@ static final int DEBUG_PARSER = 1;
 static final int DEBUG_PARSER_DETAIL = 2 + 1;
 static final int DEBUG_PARSER_RESULT = 4;
 static final int DEBUG_FIXED_FILE = 8;
+static final int DEBUG_EVENT = 16;
 
 //static final int debug = DEBUG_FIXED_FILE;
 static final int debug = 0 ;
@@ -42,19 +53,18 @@ boolean isDebug( int level ) {
 
 void setup(){
 
-  Config aConfig = readAConfig(null);
+  Config aConfig = null;
+ 
+  if ( CONFIG_START_WITH_FILESELECTION )
+    aConfig = readAConfig(null);
 
   g_config = null;
 
-  if ( aConfig == null ) {
-    exit();
-  } else {
-    initializeGUI();
-    loadFavorites();
-    updateConfig( aConfig );
-    updateFavorites( null );
-    println("Ende Setup");
-  }
+  initializeGUI();
+  g_Favorites.loadFavorites();
+  updateConfig( aConfig );
+  updateFavorites( null );
+  println("Ende Setup");
 
 } // end void setup
 

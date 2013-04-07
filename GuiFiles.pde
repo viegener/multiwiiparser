@@ -5,15 +5,16 @@
 /*************************************************************************************************/
 
 /*********************************************************************************/
-ArrayList<FavoriteFile> g_Favorites = new ArrayList<FavoriteFile>();
+Favorites g_Favorites = new Favorites();
 
 public static final String FAVORITE_FILE_NAME = "favorites.txt";
 
 /*************************************************************************************************/
 
+boolean isFileEditMode;
 
 /*************************************************************************************************/
-/****************  Favorites class                                                                 *******/
+/****************  FavoriteFile class                                                      *******/
 /*************************************************************************************************/
 
 class FavoriteFile {
@@ -49,6 +50,90 @@ class FavoriteFile {
   }
 
 }
+
+
+/*************************************************************************************************/
+/****************  Favorites class                                                         *******/
+/*************************************************************************************************/
+
+class Favorites {
+  ArrayList<FavoriteFile> mList;
+ 
+  Favorites() {
+    mList = new ArrayList<FavoriteFile>();
+  }
+
+  /***********************/
+  public int size() {
+    return mList.size();
+  }
+
+  /****************  File handling for favorite list                                         *******/
+  public void loadFavorites()
+  {
+    String[] strings = loadStrings( FAVORITE_FILE_NAME );
+  
+    if ( strings == null ) return;
+    if ( ( strings.length % 2 ) == 1 ) return;
+  
+    mList.clear();
+    for (int i=0; i <  strings.length; i+=2 ) {
+      mList.add( new FavoriteFile( new File( strings[i] ), strings[i+1] ) );    
+    }
+  }
+
+  public void saveFavorites()
+  {
+    String[] strings = new String[g_Favorites.size() * 2];
+    for (int i=0; i <  mList.size(); i++) {
+      strings[(i*2)] = mList.get(i).getPath();
+      strings[(i*2)+1] = mList.get(i).getComment();
+    }
+  
+    saveStrings( FAVORITE_FILE_NAME, strings );
+  }
+
+  /****************  Favorites list handling   *******/
+  public void addFavorite( FavoriteFile aFF ) {
+    mList.add( aFF );  
+    if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
+  }
+  
+  public void delFavorite( int idxToDel ) {
+    if ( ( idxToDel >= 0 ) && ( idxToDel < g_Favorites.size() ) ) {
+      mList.remove( idxToDel );
+      if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
+    }
+  }
+
+
+  /************** getName ************************/
+  String getName(int id) {
+    return mList.get(id).getName();
+  }
+
+
+  /************** getPath ************************/
+  String getPath(int id) {
+    return mList.get(id).getPath();
+  }
+
+
+  /************** getComment ************************/
+  String getComment(int id) {
+    return mList.get(id).getComment();
+  }
+
+  /************** getCmmment ************************/
+  void setComment(int id, String aComment) {
+    mList.get(id).setComment( aComment );
+    if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
+  }
+
+
+
+}
+
 
 
 /*************************************************************************************************/
@@ -88,7 +173,6 @@ Config readAConfig( String givenFileName ) {
 
 
 void writeAConfig( boolean doMinimal ) {
-  
   g_file = null;
   
   String prpart = "";
@@ -112,7 +196,9 @@ void writeAConfig( boolean doMinimal ) {
     }
   
     saveStrings(g_file.getAbsolutePath(), configText );
-  }
+    isConfigModified = false;
+    setWriteReminder();
+    }
 }
 
 
@@ -123,42 +209,13 @@ void fileSelected( File aFile ) {
 }
 
 /*************************************************************************************************/
-/****************  File handling for favorite list                                         *******/
-/*************************************************************************************************/
-public void loadFavorites()
-{
-  String[] strings = loadStrings( FAVORITE_FILE_NAME );
-
-  if ( strings == null ) return;
-  if ( ( strings.length % 2 ) == 1 ) return;
-
-  g_Favorites.clear();
-  for (int i=0; i <  strings.length; i+=2 ) {
-    g_Favorites.add( new FavoriteFile( new File( strings[i] ), strings[i+1] ) );    
-  }
-}
-
-public void saveFavorites()
-{
-  String[] strings = new String[g_Favorites.size() * 2];
- 
-  for (int i=0; i <  g_Favorites.size(); i++) {
-    strings[(i*2)] = g_Favorites.get(i).getPath();
-    strings[(i*2)+1] = g_Favorites.get(i).getComment();
-  }
-
-  saveStrings( FAVORITE_FILE_NAME, strings );
-}
-
-
-
-
-/*************************************************************************************************/
 /****************  Buttons                                                                 *******/
 /*************************************************************************************************/
 
 /*************************************************************************************************/
 public void btnSelectFile(int theValue) {
+  if ( isFileEditMode ) return;
+
   Config aConfig = readAConfig(null);
 
   if ( aConfig != null ) {
@@ -171,19 +228,21 @@ public void btnSelectFile(int theValue) {
 
 /*************************************************************************************************/
 public void btnCleanFile(int theValue) {
+  if ( isFileEditMode ) return;
+
   btnCleanCompFile( theValue );
 
   if ( g_config != null ) {
     updateConfig( null );
     updateFavorites( null );
   }
-
 }
-
 
 
 /*************************************************************************************************/
 public void btnSelectCompFile(int theValue) {
+  if ( isFileEditMode ) return;
+
   Config aConfig = readAConfig(null);
 
   if ( aConfig != null ) {
@@ -195,6 +254,8 @@ public void btnSelectCompFile(int theValue) {
 
 /*************************************************************************************************/
 public void btnAddToFavorites(int theValue) {
+  if ( isFileEditMode ) return;
+
   String filename = txfFilename.getText().trim();
   
   if ( filename.length() > 0 ) {
@@ -205,6 +266,8 @@ public void btnAddToFavorites(int theValue) {
 
 /*************************************************************************************************/
 public void btnCompAddToFavorites(int theValue) {
+  if ( isFileEditMode ) return;
+
   String filename = txfCompareFile.getText().trim();
   
   if ( filename.length() > 0 ) {
@@ -214,6 +277,7 @@ public void btnCompAddToFavorites(int theValue) {
 
 /*************************************************************************************************/
 public void btnCleanCompFile(int theValue) {
+  if ( isFileEditMode ) return;
 
   if ( g_CompConfig != null ) {
     updateCompConfig( null );
@@ -223,16 +287,18 @@ public void btnCleanCompFile(int theValue) {
 }
 
 /*************************************************************************************************/
-public void btnFileSave(int theValue) {
-
-  saveFavorites();
+public void btnFavoritesSave(int theValue) {
+  if ( isFileEditMode ) return;
+  g_Favorites.saveFavorites();
 }
 
 /*************************************************************************************************/
 public void btnFileRemove(int theValue) {
+  if ( isFileEditMode ) return;
+
   int actId = lstFilePath.getId();
   if ( ( actId >= 0 ) && ( actId < g_Favorites.size() ) ) {
-    g_Favorites.remove( actId );
+    g_Favorites.delFavorite( actId );
     if ( actId == g_Favorites.size() )
       actId--;
     updateFavorites( actId );      
@@ -281,7 +347,7 @@ public void updateFavorites(FavoriteFile aNewFF, int newId) {
   }   
 
   if ( aNewFF != null ) {
-    g_Favorites.add( aNewFF );  
+    g_Favorites.addFavorite( aNewFF );
   }
   updateFavList( lstFilePath, 0 );
   updateFavList( lstFileName, 1 );
@@ -303,13 +369,23 @@ public void updateFavEntry(int newId) {
   }
   
   if ( newId >= 0 ) {
+    if ( isCommModified() ) {
+      // disable event handling
+      isUpdateEnabled = false;
+      lstFilePath.setValue( lstFilePath.getId() );
+      isUpdateEnabled = true;
+      return;
+    } else if ( isFileEditMode ) {
+      finalizeCommEdit( false );
+    }
+
     lstFilePath.setId( newId );
     lstFilePath.setActiveValue(newId);
 
     if ( isCurrentlyDoubleClick ) {
       isCurrentlyDoubleClick = false;
       // on DOuble Click fill in to either next empty slot or last selected
-      Config aConfig = readAConfig(g_Favorites.get(newId).getPath());
+      Config aConfig = readAConfig(g_Favorites.getPath(newId));
 
       if ( aConfig != null ) {
         if ( g_config == null ) {
@@ -328,45 +404,142 @@ public void updateFavEntry(int newId) {
 
   int actId = lstFilePath.getId();
   if ( ( actId >= 0 ) && ( actId < lstFilePath.itemCount() ) ) {
-    setEditorFieldsFromFavorite( g_Favorites.get(actId) );
+    setEditorFieldsFromFavorite( actId );
   }
 
 }
 
 
 /*************************************************************************************************/
-void setEditorFieldsFromFavorite( FavoriteFile aFF ) {
-  if ( aFF == null ) {
+void setEditorFieldsFromFavorite( int actId ) {
+  if ( actId >= 0 ) {
+    txfName.setValue( g_Favorites.getPath(actId) );
+    txfComment.setValue( g_Favorites.getComment(actId) );
+  } else {
     txfName.setText( "" );
     txfComment.setText( "" );
-  } else {
-    txfName.setValue( aFF.getPath() );
-    txfComment.setValue( aFF.getComment() );
   }
 }
 
 
-
-
-
-  /*************************************************************************************************/
+/*************************************************************************************************/
 public void updateFavList(SelectListBox lstSel, int which) {
   lstSel.beginItems();
   lstSel.setValue( 0 ).clear();
   for (int j = 0 ; j < g_Favorites.size(); j++) {
-    FavoriteFile ff = g_Favorites.get(j);
     if ( which == 0 ) {
-      lstSel.addItem( ff.getPath(), j );
+      lstSel.addItem( g_Favorites.getPath(j), j );
     } else if ( which == 1 ) {
-      lstSel.addItem( ff.getName(), j );
+      lstSel.addItem( g_Favorites.getName(j), j );
     } else {
-      lstSel.addItem( ff.getComment(), j );
+      lstSel.addItem( g_Favorites.getComment(j), j );
     }
   }
 
   lstSel.endItems();
 }
 
+
+/*************************************************************************************************/
+/****************  Handle Comment Edit                                                       *******/
+/*************************************************************************************************/
+
+/*************************************************************************************************/
+public boolean isCommModified() {
+  if ( ! isFileEditMode ) {
+    return false;
+  }
+  
+  int actId = lstFilePath.getId();
+  String comm =  trim(txfComment.getText());
+
+  return ( ! ( comm.equals( g_Favorites.getComment(actId) ) ) );
+}
+
+
+/*************************************************************************************************/
+public void finalizeCommEdit(boolean doSave) {
+  boolean isEnded = true;
+
+  if ( ( ! doSave ) && ( isCommModified() ) ) {
+    int choice = JOptionPane.showConfirmDialog(null,
+        "Discard changes to the current Favorites ?", "Unsaved Comment", 
+        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if ( ( choice == JOptionPane.CANCEL_OPTION ) || ( choice == JOptionPane.NO_OPTION ) ) { 
+      return;
+    } else if ( choice == JOptionPane.YES_OPTION ) {
+      isEnded = true;
+    }
+  } else {
+    if ( ( doSave ) && ( isCommModified() ) ) {
+      int actId = lstFilePath.getId();
+      String comm =  trim(txfComment.getText());
+      g_Favorites.setComment( actId, comm );
+
+      isEnded = true;
+    }
+  }
+
+  // reset UI if really finalized
+  if ( isEnded ) {
+    txfComment.lock();
+
+    txfComment.setColor( ControlP5.CP5BLUE );
+  
+    btnFileCancel.setColor( ControlP5.CP5BLUE );
+    btnFileSave.setColor( ControlP5.CP5BLUE );
+
+    isFileEditMode = false;
+    btnFileSave.setCaptionLabel( "   Edit" );
+    btnFileCancel.setVisible( false );
+
+    btnFileRemove.setVisible( true );
+  }
+}
+
+/*************************************************************************************************/
+public void startFileEdit() {
+  // modify UI for starting edit
+
+  txfComment.unlock();
+  txfComment.setColor( ControlP5.RED );
+  
+  btnFileCancel.setColor( ControlP5.RED );
+  btnFileSave.setColor( ControlP5.RED );
+
+  btnFileRemove.setVisible( false );
+
+  isFileEditMode = true;
+  btnFileSave.setCaptionLabel( "   Save" );
+  btnFileCancel.setVisible( true );
+}
+
+
+/*************************************************************************************************/
+public void btnFileSave(int theValue) {
+  if ( isFileEditMode ) {
+    finalizeCommEdit( true );
+    if ( ! isEditMode ) {
+      // Refresh fields from Favorite
+      // full screen needs refresh probably
+      int actId = lstFilePath.getId();
+      updateFavorites( actId );
+    }
+  } else {
+    startFileEdit();
+  }
+}
+
+
+/*************************************************************************************************/
+public void btnFileCancel(int theValue) {
+  finalizeCommEdit( false );
+  if ( ! isFileEditMode ) {
+    // Refresh fields from Entry
+    // full screen needs refresh probably
+    updateFavEntry( -1 );
+  }
+}
 
 
 

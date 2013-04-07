@@ -16,6 +16,7 @@ boolean isCreateEditor = false;
 /*********************************************************************************/
 
 Config g_config;
+boolean isConfigModified = false;
 
 public boolean tabDetailsIsReady() {
  return ( g_config != null ); 
@@ -31,14 +32,14 @@ public boolean tabDetailsIsReady() {
 
 /*************************************************************************************************/
 public void btnWriteFull(int theValue) {
-  if ( ! isModified() ) {
+  if ( ! isEditMode ) {
     writeAConfig( false );
   }
 }
 
 /*************************************************************************************************/
 public void btnWriteMinimal(int theValue) {
-  if ( ! isModified() ) {
+  if ( ! isEditMode ) {
     writeAConfig( true );
   }
 }
@@ -56,7 +57,7 @@ public void updateToggleNoValue() {
   ConfSection cs = g_config.get(drpSection.getId());
   ConfGroup cg = cs.get(drpGroup.getId());
   
-  println(" Toggle No Value " +  togNoValue.getState() );
+//  println(" Toggle No Value " +  togNoValue.getState() );
   cg.setHaveNoValue( togNoValue.getState() );
 }
 
@@ -91,6 +92,9 @@ public void updateConfig(Config aConfig) {
   isUpdateEnabled = true;
   
   g_config = aConfig;
+  isConfigModified = false;
+  setWriteReminder();
+  
   if ( aConfig == null ) {
     updateTab( tabDefault );
     return;
@@ -183,7 +187,6 @@ public void updateGroup(int newId) {
   }
 
   if ( ! togAll.getState() ) {
-    println("Selected Group Index : " + drpGroup.getId() );
     grpSubSection.setText(cg.getSubsectionName());    
 
     if ( cg.hasComments() ) {
@@ -240,6 +243,7 @@ public void updateEntry(int newId) {
       isUpdateEnabled = false;
       for (int j = 0 ; j < g_config.size(); j++) {
         if ( g_config.get(j).equals( cs ) ) {
+          drpSection.setId( j );
           drpSection.setValue( j );
         }
       }
@@ -249,6 +253,7 @@ public void updateEntry(int newId) {
       isUpdateEnabled = false;
       for (int j = 0 ; j < cs.size(); j++) {
         if ( cs.get(j).equals( cg ) ) {
+          drpGroup.setId( j );
           drpGroup.setValue( j );
         }
       }
@@ -350,6 +355,17 @@ String getEntryText( ConfEntry ce, int which ) {
 /*************************************************************************************************/
 
 /*************************************************************************************************/
+public void setWriteReminder() {
+  if ( isConfigModified ) {
+    btnWriteFull.setColor( ControlP5.RED );
+    btnWriteMinimal.setColor( ControlP5.RED );
+  } else {
+    btnWriteFull.setColor( ControlP5.CP5BLUE );
+    btnWriteMinimal.setColor( ControlP5.CP5BLUE );
+  }
+}
+
+/*************************************************************************************************/
 public boolean isModified() {
   if ( ! isEditMode ) {
     return false;
@@ -424,7 +440,7 @@ public String validateEntry(String name, String value, String comment, boolean a
     }
   }
   
-  // ?? check for comment --> either start with "//" or be /* followed by */
+  // check for comment --> either start with "//" or be /* followed by */
   if ( comment.length() > 0 ) {
     if ( ! comment.startsWith( "//" ) ) {
       if ( ! comment.startsWith( "/*" ) ) {
@@ -444,7 +460,6 @@ public String validateEntry(String name, String value, String comment, boolean a
 public boolean changeEntryfromForm() {
 
   // get values from form
-  
   String name =  trim(txfName.getText());
   String value =  trim(txfValue.getText());
   String comment =  trim(txfComment.getText());
@@ -498,6 +513,9 @@ public void finalizeEdit(boolean doSave) {
   } else {
     if ( ( doSave ) && ( isModified() ) ) {
       isEnded = changeEntryfromForm();
+      isConfigModified = true;
+      setWriteReminder();
+
     }
   }
 
@@ -522,8 +540,6 @@ public void finalizeEdit(boolean doSave) {
 
     btnEditCreate.setVisible( true );
     btnEditRemove.setVisible( true );
-
-
   }
 }
 
@@ -585,10 +601,11 @@ public void btnEditSave(int theValue) {
 
     if ( cg.haveNoValue() ) {
       ConfEntry activeCE = cg.getFirstActive();
-      if ( activeCE != null )
+      if ( activeCE != null ) {
         if ( ! ( activeCE.equals( ce ) ) ) {
           blnWithActive = false;
         }    
+      }
     }
 
     isCreateEditor = false;

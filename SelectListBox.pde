@@ -80,7 +80,7 @@ public class LTextfield extends Textfield {
     public void keyEvent(KeyEvent theKeyEvent) {
       boolean blnhandled = false;
       if (isUserInteraction && isTexfieldActive && isActive && theKeyEvent.getAction() == KeyEvent.PRESS) {
-        println( "Key is pressed : " + theKeyEvent.getKeyCode() );
+//        println( "Key is pressed : " + theKeyEvent.getKeyCode() );
         if ( ( theKeyEvent.isControlDown() ) && ( myKeyMapping.containsKey(theKeyEvent.getKeyCode())) && ( myKeyMapping.get(cp5.getKeyCode()).booleanValue() ) ) {
 //            println(" In Control handler");
             blnhandled = true;
@@ -105,7 +105,7 @@ public class LTextfield extends Textfield {
         case 'C':
           keyHandlerCopy(theKeyEvent);
           break;
-        case 'P':
+        case 'V':
           keyHandlerPaste(theKeyEvent);
           break;
         case LEFT:

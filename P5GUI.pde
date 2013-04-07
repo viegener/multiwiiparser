@@ -85,8 +85,10 @@ SelectListBox lstFilePath;
 SelectListBox lstFileName;
 SelectListBox lstFileComm;
 
-Button btnFileRemove;
 Button btnFileSave;
+Button btnFileCancel;
+Button btnFileRemove;
+Button btnFavoritesSave;
 
 /***************************/
 
@@ -537,13 +539,29 @@ public void initializeGUI() {
   /******** Buttons */
   btnFileSave = cp5.addButton("btnFileSave")
      .setPosition(ControlXPos,ButtonYPos)
+     .setSize(80,20)
+     .setCaptionLabel( "   Edit" )
+     .moveTo( tabDefault )
+     ;
+
+  btnFileCancel = cp5.addButton("btnFileCancel")
+     .setPosition(btnFileSave.getPosition().x+btnFileSave.getWidth()+20,ButtonYPos)
+     .setSize(80,20)
+     .setCaptionLabel( "   Cancel" )
+     .setVisible(false)
+     .moveTo( tabDefault )
+     ;
+
+  btnFavoritesSave = cp5.addButton("btnFavoritesSave")
+     .setPosition(AdditionalXPos,ButtonYPos)
      .setSize(120,20)
      .setCaptionLabel( "   Save Favorites" )
      .moveTo( tabDefault )
      ;
+  if (CONFIG_AUTOSAVE_FAVORITES ) btnFavoritesSave.hide();
 
   btnFileRemove = cp5.addButton("btnFileRemove")
-     .setPosition(ControlXPos + btnFileSave.getWidth() + 50,ButtonYPos)
+     .setPosition(btnFileCancel.getPosition().x+btnFileCancel.getWidth() + 50,ButtonYPos)
      .setSize(80,20)
      .setCaptionLabel( "   Remove" )
      .moveTo( tabDefault )
@@ -707,16 +725,16 @@ void controlEvent(ControlEvent theEvent) {
   if (theEvent.isGroup()) {
     // Check if Event was triggered from drpSection
     if ( theEvent.getGroup().equals( drpSection ) ) {
-      println("  event from drpSection ");
+      if ( isDebug( DEBUG_EVENT ) ) println("  event from drpSection ");
       updateSection((int(theEvent.getGroup().getValue())));     
     } else     if ( theEvent.getGroup().equals( drpGroup ) ) {
-      println("  event from drpGroup ");
+      if ( isDebug( DEBUG_EVENT ) ) println("  event from drpGroup ");
       updateGroup((int(theEvent.getGroup().getValue())));     
     } else if ( ( theEvent.getGroup().equals( drpLCSection ) ) || ( theEvent.getGroup().equals( drpRCSection ) ) ) {
-      println("  event from drpL/RCSection ");
+      if ( isDebug( DEBUG_EVENT ) ) println("  event from drpL/RCSection ");
       updateCompSection((LDropdownList) theEvent.getGroup(), (int(theEvent.getGroup().getValue())));     
     } else if (theEvent.getGroup() instanceof SelectListBox ) {
-      println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
+      if ( isDebug( DEBUG_EVENT ) ) println("event from group : "+theEvent.getGroup().getValue()+" from "+theEvent.getGroup());
       if ( theEvent.getGroup().getTab() == tabCompare ) {
         updateDeltaEntry((SelectListBox) theEvent.getGroup(), (int(theEvent.getGroup().getValue())));     
       } else if ( theEvent.getGroup().getTab() == tabDetails ) {
@@ -726,7 +744,7 @@ void controlEvent(ControlEvent theEvent) {
       }
     }
   } else if ( theEvent.isTab()  ) {  
-      println("event from tab ");
+      if ( isDebug( DEBUG_EVENT ) ) println("event from tab ");
       updateTab(  theEvent.getTab() );
   } else if (  ( theEvent.getController() instanceof Toggle) ) {  
     if ( ( theEvent.getController().equals( togAll ) ) || ( theEvent.getController().equals( togShowOnlyActive ) ) ) { 
@@ -755,7 +773,10 @@ public void makeTabReady( Tab aTab ) {
   if ( aTab == tabDetails ) {
     updateEntry(-1);
   } else if ( aTab == tabCompare ) {
+    updateCompLists();
     updateDeltaEntry(null,-1);
+  } else if ( aTab == tabDefault ) {
+    updateFavEntry(-1);
   }
 
 }
@@ -765,27 +786,32 @@ public void makeTabReady( Tab aTab ) {
 /*************************************************************************************************/
 
 public void updateTab( Tab aTab ) {
+  boolean makeReady = true;
+  
+  // no change of tab in edit mode
+  if ( isFileEditMode || isEditMode ) { 
+    aTab = lastTab;
+    makeReady = false; 
+  }
 
+  // no change to Compare if no data available (not ready)
   if ( ( aTab == tabCompare ) && ( ! tabCompareIsReady() ) ) {
     aTab = lastTab;
+    makeReady = false; 
   }
 
+  // no change to Details if no data available (not ready)
   if ( ( aTab == tabDetails ) && ( ! tabDetailsIsReady() ) ) {
     aTab = tabDefault;
-  }
-
-  if ( aTab == tabDetails ) {
-    CurrentTabMode = TAB_DETAILS;
-  } else if ( aTab == tabDefault ) {
-    CurrentTabMode = TAB_DEFAULT;
-  } else if ( aTab == tabCompare ) {
-    CurrentTabMode = TAB_COMPARE;
+    makeReady = false; 
   }
 
   aTab.bringToFront();
   lastTab = aTab;
 
-  makeTabReady( lastTab );
+  if ( makeReady ) {
+    makeTabReady( lastTab );
+  }
 }
 
 

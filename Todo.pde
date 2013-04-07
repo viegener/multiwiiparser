@@ -5,21 +5,19 @@
 /*************************************************************************************************/
 
 
-static final String MWP_VERSION = "0.3 pre";
+static final String MWP_VERSION = "0.3";
 static final String MWP_REVISION = "2013/04/06"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
 
 /***************** TODO **********************************************************
-- FILE: start empty
-- FILE: allow comment (use edit fields)
-- FILE: Auto save of Favorites??
+- USABILITY: Fields aligned and better distributed 
+- USABILITY: Color coding --> Blue is interactive / grey is showing data / Red is focus for edit (Background ?)
+- USABILITY: Hide all buttons not active  
 
-- DELTA: COlor the change
+- DELTA: Show colors for changes (green added / red removed)
 - DELTA: Allow selection of single section for comparision
-
-- DELTA and DETAILS: Check for unsaved modifications
 
 * USECASE 4 - Apply modifications in delta list into config.h
     -- TODO: Apply changes to a config.h (esp. haveSameName / noValue)
@@ -43,6 +41,7 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 
 - Add javadoc
 - Allow search for entries
+- DELTA and DETAILS: Check for unsaved modifications
 
 
 ---- NICE TO HAVE ------
@@ -51,12 +50,23 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 - show count of entries in label for droplist
 - Background of drop down should be blanked and not shine through
 - cleanup debug handling: e.g. - event output bound to debug setting
-- beautify the UI: Colors, Fields aligned, 
 - DELTA: Show filename
 
 =======================================================================================
 DONE:
-06.04.2013
+
+------------------
+06.04.2013 - 0.3 finalized
+- DEFECT: Compare for entries with multiple values is not reliable --> improved (active entries have precedence)
+- Mark WRITE/MINIMAL red if g_config is changed but not saved
+- DEFECT: List in Favorites should not be changed
+- DEFECT: Switch of tabs needs to be disabled if Editor is active
+- FILE: allow comment editing (use edit fields)
+- DELTA: More details on change
+- FILE: start empty --> configurable
+- FILE: Auto save of Favorites --> configurable
+- DEFECT: Past button did not work
+----
 - FILE: remove favorite
 - FILE: Save/Load favorites
 - FILE: show comment and file in details

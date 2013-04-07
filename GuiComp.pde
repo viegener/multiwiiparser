@@ -67,7 +67,7 @@ public void updateCompLists() {
   // calculate delta list 
   calcDeltaList(togCompareDiff.getState(), togCompareActive.getState() );
 
-  // ?? create list with all entries
+  // create list with all entries
   lstEntryLeft.beginItems();
   lstEntryInfo.beginItems();
   lstEntryRight.beginItems();
@@ -92,17 +92,12 @@ public void updateCompLists() {
     }
     
     if ( de.hasBoth() ) {
-      if ( de.isEqual() ) {
-        lstEntryInfo.addItem( "==", j );
-      } else {
-        
-        lstEntryInfo.addItem( "<>", j );
-      }
+      lstEntryInfo.addItem( de.getDifference(), j );
     } else if ( de.hasRight() ) {
       lstEntryInfo.addItem( "++", j );
     } else {
       lstEntryInfo.addItem( "--", j );
-    }
+    } 
     
   }
 
@@ -122,7 +117,7 @@ public void calcDeltaList(boolean onlyDiff, boolean onlyActive) {
   ConfEntry aLCE, aRCE;
   boolean addEntry;
   
-  // ?? Calculate entry diff based on sorted lists
+  // Calculate entry diff based on sorted lists
   deltaList.clear();
     
   while ( ( lPos < lSize ) && ( rPos < rSize ) ) {

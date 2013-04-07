@@ -284,7 +284,7 @@ Config parseConfig(String filename) {
       } else if ( isSingleCommentLine(baseLine) ) {
         commNo = 1;
       } else {
-        // This is an unexpected type of line --> ignore ??
+        // This is an unexpected type of line --> ignore 
         print("!! Unexpected line :");
         print(baseLine);
         println(":");

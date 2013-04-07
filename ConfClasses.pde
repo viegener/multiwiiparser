@@ -18,7 +18,7 @@
 
     if ( aLeft.getName().equals( aRight.getName() ) ) {
       if ( aLeft.isActive() == aRight.isActive() ) {
-        if ( ( ! aLeft.hasValue() ) || ( aLeft.getValue().equals( aRight.getValue() )  ) ) {
+        if ( aLeft.getValue().equals( aRight.getValue() )  ) {
           equal = true;
         }
       }
@@ -635,7 +635,6 @@ class ConfSection  extends ConfObject {
 }  
 
 
-
 /*************************************************************************************************/
 /**************** Config                                                                   *******/
 /*************************************************************************************************/
@@ -653,7 +652,6 @@ class Config extends ConfObject {
   ConfObject getSortedNamesByIndex( int anIndex ) {
     return (ConfObject) mSortedNames.get( anIndex );
   }
-  
   
   /************** mRawLines ************************/
   void setRawLines( String[] lines ) {
@@ -702,9 +700,15 @@ class Config extends ConfObject {
         ConfObject cg = cs.get(j);
         if ( cg.mHaveSameName ) {
           // Add only one entry for mHaveSameName groups
+          // find if active entry
+          for (int k = 0 ; k < cg.mList.size(); k++) {
+            addSorted( (ConfEntry) cg.get(k), true );
+          }
+/*
           if ( cg.size() > 0 ) {
             addSorted( (ConfEntry) cg.get(0), false );
           }
+*/
         } else {
           for (int k = 0 ; k < cg.mList.size(); k++) {
             addSorted( (ConfEntry) cg.get(k), cg.mIsMixed );
@@ -727,10 +731,24 @@ class Config extends ConfObject {
       // append at the end if nothing smaller found
       mSortedNames.add( ce );
     } else if ( aName.equals( ((ConfEntry) mSortedNames.get(i)).getName() ) ) {
+      // Duplicate
+
       if ( ! acceptDuplicate ) {
         println("!!Error!! Duplicate entry name :" +  aName );
         exit();
       }
+      
+      if ( ce.isActive() ) {
+        // if other entry is also active --> This is a mistake
+        if ( ((ConfEntry) mSortedNames.get(i)).isActive() ) {
+          println("!!Error!! Duplicate Active entry name  :" +  aName );
+          exit();
+        }
+
+        // If active replace
+        mSortedNames.set( i, ce );
+      }
+
     } else {
       // insert at the index of the first entry larger 
       mSortedNames.add( i, ce );
@@ -849,12 +867,10 @@ class DeltaEntry {
     } else if ( mRCE != null ) {
       mName = mRCE.getName(); 
     } else {
-      mName = "--"; 
+      mName = "---"; 
     }
     
   }
-  
-  
   
 
 
@@ -903,9 +919,41 @@ class DeltaEntry {
     return mRCE;
   }
 
+  /************** getDNameRight ************************/
+  String getDifference() {
 
+    if ( hasBoth() ) {
+      if ( isEqual() ) {
+        return " = ";
+      } else {
+        String diff = "";
+        if ( mLCE.isActive() == mRCE.isActive() ) {  
+           diff += "    ";
+        } else if ( mLCE.isActive() ) {
+           diff += "-A ";
+        } else if ( mRCE.isActive() ) {
+           diff += "+A ";
+        }
+        if ( ( ! mLCE.hasValue() ) && ( ! mRCE.hasValue() ) ) {
+          diff += "    ";
+        } else if ( mLCE.getValue().equals( mRCE.getValue() )  ) {
+          diff += "     ";
+        } else if ( ! mLCE.hasValue() ) {
+          diff += "+V ";
+        } else if ( ! mRCE.hasValue() ) {
+          diff += "-V ";
+        } else {
+          diff += "!V ";
+        }
+        return diff;
+      }
+    } else if ( hasRight() ) {
+       return " ++ ";
+    } else {
+       return " -- ";
+    }
 
-
+  }
 
 }
 
