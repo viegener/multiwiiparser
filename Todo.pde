@@ -1,17 +1,47 @@
+/************************************************************************************************
+ *
+ *  MultiWiiParser
+ *
+ *  Copyright 2013 by Johannes Viegener
+ *
+ *  This file is part of MultiWiiParser.
+ *
+ *  MultiWiiParser is free software: you can redistribute it and/or modify
+ *  it under the terms of the Lesser GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  MultiWiiParser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the Lesser GNU General Public License
+ *  along with MultiWiiParser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author     Johannes Viegener
+ *
+ *************************************************************************************************/ 
+
 /*************************************************************************************************/
 /*****************                                                                 ***************/
-/****************  TODO (and Done LIST)  --> No Code in here                               *******/
+/****************  TODO (and Done LIST)  --> No real code in h                             *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
 
 static final String MWP_VERSION = "0.3";
-static final String MWP_REVISION = "2013/04/06"; 
+static final String MWP_REVISION = "2013/04/09"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
+static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes Viegener";
+
 
 /***************** TODO **********************************************************
+- DEFECT: Selection in Delta tab is not kept after tab change (back and forth)
+- DEFECT: Selection in Files tab is not kept after tab change (back and forth)
+
 - USABILITY: Fields aligned and better distributed 
 - USABILITY: Color coding --> Blue is interactive / grey is showing data / Red is focus for edit (Background ?)
 - USABILITY: Hide all buttons not active  
@@ -19,33 +49,30 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 - DELTA: Show colors for changes (green added / red removed)
 - DELTA: Allow selection of single section for comparision
 
-* USECASE 4 - Apply modifications in delta list into config.h
+* USECASE 5 - Apply modifications in delta list into config.h
     -- TODO: Apply changes to a config.h (esp. haveSameName / noValue)
     -- TODO: check for compliance on changes
     -- TODO: Deactivate other entries if necessary (based on Groups)
 
-* USECASE 5 - Handle a persistent catalog for config files
-    -- Show current filename
-    -- Show last filenames used or favories
-    -- TODO: Assign a comment for a filename
+* USECASE 6 - Apply configurations and load to MultiWii
     -- TODO: Define and display a multiwii directory
     -- TODO: Apply a filename into a multiwii directory
     -- TODO: Start arduino software for multiwii
     -- TODO: Validate also if Board and COM-Port can be changed beforehand
     
-* USECASE 6 - Open a config.h (as a template) and apply another config to it
+* USECASE 7? - Open a config.h (as a template) and apply another config to it
     -- TODO: Apply changes to a config.h including check fo compliance
     -- TODO: Deactivate other entries if necessary (based on Groups)
 
 --------------------------------
 
 - Add javadoc
-- Allow search for entries
 - DELTA and DETAILS: Check for unsaved modifications
+- USABILITY: Scrollbars in dropdown are not as expected (they should be only taking the invisible part into account)
 
-
----- NICE TO HAVE ------
-- handle complex defines ( parametereized values)
+---- NICE TO HAVE / IDEAS ------
+- Allow search for entries
+- handle complex defines better ( parametereized values)
 - Allow resorting of entries in a group
 - show count of entries in label for droplist
 - Background of drop down should be blanked and not shine through
@@ -54,6 +81,10 @@ static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION
 
 =======================================================================================
 DONE:
+
+08.4.2013
+- Add Header for Copyright and License to source
+- Add license.txt
 
 ------------------
 06.04.2013 - 0.3 finalized
@@ -192,40 +223,6 @@ DONE:
 - Add generic base class for Config
 - handle comments on any element
 - show comments
-
-================================================================================
-
-* USECASE 1 - Select a config file and show it
-    -- Select config file
-    -- show alphabetically all setting
-    -- show the settings grouped
-    -- Show one group in a Listbox with the details
-    -- Show only active settings
-    -- Select output file
-    -- write minimal settings to a config.
-    -- write a mostly complete config file
-
-* USECASE 2 - Select a config file and edit it 
-    Plus USECASE 1
-    -- Add EDIT/CANCEL Button for unlock entry
-    -- Add create/remove button
-    -- Set a configuration active/non-active
-    -- Edit a config value
-    -- remove a config value
-    -- add a config value
-    -- Check activation is not creating incompleteness
-    -- If entries are changed and cancel / new selection ==> Ask for Save or Cancel
-    
-* USECASE 3 - Open two different config.h and show the differences
-    -- Show the delta
-    -- Show only different ones that are active
-  
--------------------------------------
-
-
-
-
-
 
 
 /*********************************************************************************/

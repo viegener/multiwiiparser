@@ -1,3 +1,28 @@
+/************************************************************************************************
+ *
+ *  MultiWiiParser
+ *
+ *  Copyright 2013 by Johannes Viegener
+ *
+ *  This file is part of MultiWiiParser.
+ *
+ *  MultiWiiParser is free software: you can redistribute it and/or modify
+ *  it under the terms of the Lesser GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  MultiWiiParser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the Lesser GNU General Public License
+ *  along with MultiWiiParser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author     Johannes Viegener
+ *
+ *************************************************************************************************/ 
+
 /*************************************************************************************************/
 /*****************                                                                 ***************/
 /****************  P5GUI only init                                                         *******/
@@ -70,8 +95,8 @@ Button btnEditRemove;
 
 /***************************/
 
-Textfield txfFilename;
-Textfield txfCompareFile;
+LTextfield txfFilename;
+LTextfield txfCompareFile;
 
 Button btnAddToFavorites;
 Button btnSelectFile;
@@ -134,7 +159,7 @@ public void initializeGUI() {
   int ControlXPos = 92;
   int AdditionalXPos = 630;
 
-  int SectionYPos = 30;
+  int SectionYPos = 40;
   int GroupYPos = 80;
   int EntryYPos = 200;
   int DetailYPos = 340;
@@ -311,6 +336,8 @@ public void initializeGUI() {
     .setCaptionLabel("Name   ")
     .lock()
     .moveTo( tabDetails )
+     .setColorBackground(color(255, 20))
+     .setColorForeground(color(0, 0,0))
     ;
 
   togEntryActive = new InToggle( cp5, "Active");
@@ -329,6 +356,8 @@ public void initializeGUI() {
     .setCaptionLabel("Value   ")
     .lock()
      .moveTo( tabDetails )
+     .setColorBackground(color(255, 20))
+     .setColorForeground(color(0, 0,0))
     ;
        
   txfComment = new LTextfield( cp5, "txfComment" );
@@ -339,6 +368,8 @@ public void initializeGUI() {
     .setCaptionLabel("Comment   ")
     .lock()
     .moveTo( tabDetails )
+     .setColorBackground(color(255, 20))
+     .setColorForeground(color(0, 0,0))
     ;
 
 
@@ -420,6 +451,9 @@ public void initializeGUI() {
     .lock()
     .setCaptionLabel("Filename  ")
      .moveTo( tabDefault )
+     .setColorBackground(color(255, 20))
+         .setColorActive(color(0))
+     .setColorForeground(color(0, 0,0))
     ;
 
   /******** Buttons */
@@ -453,6 +487,9 @@ public void initializeGUI() {
     .lock()
     .setCaptionLabel("Compared to   ")
      .moveTo( tabDefault )
+     .setColorBackground(color(255, 20))
+     .setColorActive(color(0))
+     .setColorForeground(color(0, 0))
     ;
 
   /******** Buttons */
@@ -759,7 +796,7 @@ void controlEvent(ControlEvent theEvent) {
 }
 
 /*************************************************************************************************/
-/****************  makeTabReady                                                              *******/
+/****************  makeTabReady                                                            *******/
 /*************************************************************************************************/
 
 public void makeTabReady( Tab aTab ) {

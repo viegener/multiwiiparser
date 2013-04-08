@@ -1,6 +1,31 @@
+/************************************************************************************************
+ *
+ *  MultiWiiParser
+ *
+ *  Copyright 2013 by Johannes Viegener
+ *
+ *  This file is part of MultiWiiParser.
+ *
+ *  MultiWiiParser is free software: you can redistribute it and/or modify
+ *  it under the terms of the Lesser GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  MultiWiiParser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the Lesser GNU General Public License
+ *  along with MultiWiiParser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author     Johannes Viegener
+ *
+ *************************************************************************************************/ 
+
 /*************************************************************************************************/
 /*****************                                                                 ***************/
-/****************  GUIFILES                                                               *******/
+/****************  GUIFILES                                                                *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
 
@@ -68,7 +93,7 @@ class Favorites {
     return mList.size();
   }
 
-  /****************  File handling for favorite list                                         *******/
+  /****************  File handling for favorite list         *******/
   public void loadFavorites()
   {
     String[] strings = loadStrings( FAVORITE_FILE_NAME );
@@ -137,7 +162,7 @@ class Favorites {
 
 
 /*************************************************************************************************/
-/****************  File selection                                            *******/
+/****************  File selection                                                          *******/
 /*************************************************************************************************/
 
 Config readAConfig( String givenFileName ) {
@@ -404,7 +429,8 @@ public void updateFavEntry(int newId) {
 
   int actId = lstFilePath.getId();
   if ( ( actId >= 0 ) && ( actId < lstFilePath.itemCount() ) ) {
-    setEditorFieldsFromFavorite( actId );
+    if ( lastTab == tabDefault )
+      setEditorFieldsFromFavorite( actId );
   }
 
 }
@@ -441,7 +467,7 @@ public void updateFavList(SelectListBox lstSel, int which) {
 
 
 /*************************************************************************************************/
-/****************  Handle Comment Edit                                                       *******/
+/****************  Handle Comment Edit                                                     *******/
 /*************************************************************************************************/
 
 /*************************************************************************************************/
