@@ -41,7 +41,6 @@ boolean isCreateEditor = false;
 /*********************************************************************************/
 
 Config g_config;
-boolean isConfigModified = false;
 
 public boolean tabDetailsIsReady() {
  return ( g_config != null ); 
@@ -58,14 +57,14 @@ public boolean tabDetailsIsReady() {
 /*************************************************************************************************/
 public void btnWriteFull(int theValue) {
   if ( ! isEditMode ) {
-    writeAConfig( false );
+    writeAConfig( false, g_config.getName() );
   }
 }
 
 /*************************************************************************************************/
 public void btnWriteMinimal(int theValue) {
   if ( ! isEditMode ) {
-    writeAConfig( true );
+    writeAConfig( true, ""  );
   }
 }
 
@@ -93,7 +92,7 @@ public void updateToggle(Toggle aToggle) {
     return;
   }
   
-  if ( isModified() ) {
+  if ( isChangedEditor() ) {
     // disable event handling
     isUpdateEnabled = false;
     aToggle.setState( ! aToggle.getState() );
@@ -117,7 +116,9 @@ public void updateConfig(Config aConfig) {
   isUpdateEnabled = true;
   
   g_config = aConfig;
-  isConfigModified = false;
+  if ( g_config != null ) {
+    g_config.setModified( false );
+  }
   setWriteReminder();
  
   if ( aConfig == null ) {
@@ -141,7 +142,7 @@ public void updateSection(int newId) {
   }
   
   if ( newId >= 0 ) {
-    if ( isModified() ) {
+    if ( isChangedEditor() ) {
       // disable event handling
       isUpdateEnabled = false;
       drpSection.setValue( drpSection.getId() );
@@ -182,7 +183,7 @@ public void updateGroup(int newId) {
   }
   
   if ( newId >= 0 ) {
-    if ( isModified() ) {
+    if ( isChangedEditor() ) {
       // disable event handling
       isUpdateEnabled = false;
       drpGroup.setValue( drpGroup.getId() );
@@ -242,7 +243,7 @@ public void updateEntry(int newId) {
   }
   
   if ( newId >= 0 ) {
-    if ( isModified() ) {
+    if ( isChangedEditor() ) {
       // disable event handling
       isUpdateEnabled = false;
       lstEntryName.setValue( lstEntryName.getId() );
@@ -289,6 +290,15 @@ public void updateEntry(int newId) {
   }
 
   setEditorFieldsFromEntry( aCE );
+  
+  if ( isCurrentlyDoubleClick ) {
+    isCurrentlyDoubleClick = false;
+    // open favorite
+    if ( ! isEditMode ) {
+      btnEditSave( 0 );
+    }
+  }
+
 }
 
 
@@ -381,7 +391,7 @@ String getEntryText( ConfEntry ce, int which ) {
 
 /*************************************************************************************************/
 public void setWriteReminder() {
-  if ( isConfigModified ) {
+  if ( ( g_config != null ) && ( g_config.isModified() ) ) {
     btnWriteFull.setColor( ControlP5.RED );
     btnWriteMinimal.setColor( ControlP5.RED );
   } else {
@@ -391,7 +401,7 @@ public void setWriteReminder() {
 }
 
 /*************************************************************************************************/
-public boolean isModified() {
+public boolean isChangedEditor() {
   if ( ! isEditMode ) {
     return false;
   }
@@ -450,6 +460,13 @@ public String validateEntry(String name, String value, String comment, boolean a
     }
   }
   
+  // If haveNoValue (meaning all entries only defines) value should be empty  
+  if ( cg.haveNoValue() ) {
+    if ( value.length() > 0 ) {
+      return "No values allowed in this group (HaveNoValue)";
+    }
+  }
+  
   // name should not contain any spaces and only chars, numbers, _
   for( int i = 0; i<name.length(); i++ ) {
     if ( ! isNamePart( name.charAt( i ) ) ) {
@@ -461,7 +478,9 @@ public String validateEntry(String name, String value, String comment, boolean a
   ConfEntry foundCE = g_config.getEntryByName( name );
   if ( foundCE != null ) {
     if ( ! foundCE.equals( ce ) ) {
-      return "Duplicate name \"" + name + "\" not allowed";
+      if ( foundCE.getParent() != ce.getParent() ) {
+        return "Duplicate name \"" + name + "\" not allowed";
+      }
     }
   }
   
@@ -514,7 +533,8 @@ public boolean changeEntryfromForm() {
   }
 
   g_config.rebuild();
-  
+  g_config.setModified( true );
+
   // updateEntry
   updateGroup( -1 );
 
@@ -526,7 +546,7 @@ public boolean changeEntryfromForm() {
 public void finalizeEdit(boolean doSave) {
   boolean isEnded = true;
   
-  if ( ( ! doSave ) && ( isModified() ) ) {
+  if ( ( ! doSave ) && ( isChangedEditor() ) ) {
     int choice = JOptionPane.showConfirmDialog(null,
         "Discard changes to the current entry ?", "Unsaved Entry", 
         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -536,11 +556,9 @@ public void finalizeEdit(boolean doSave) {
       isEnded = true;
     }
   } else {
-    if ( ( doSave ) && ( isModified() ) ) {
+    if ( ( doSave ) && ( isChangedEditor() ) ) {
       isEnded = changeEntryfromForm();
-      isConfigModified = true;
       setWriteReminder();
-
     }
   }
 
@@ -551,21 +569,26 @@ public void finalizeEdit(boolean doSave) {
     txfComment.lock();
     togEntryActive.lock();
 
-    txfName.setColorBackground(color(255, 20))
+    txfName.setColor( ControlP5.CP5BLUE )
+     .setColorBackground(color(255, 20))
      .setColorForeground(color(0, 0,0));
 
-    txfValue.setColorBackground(color(255, 20))
+    txfValue.setColor( ControlP5.CP5BLUE )
+     .setColorBackground(color(255, 20))
      .setColorForeground(color(0, 0,0));
     
-    txfComment.setColorBackground(color(255, 20))
+    txfComment.setColor( ControlP5.CP5BLUE )
+     .setColorBackground(color(255, 20))
      .setColorForeground(color(0, 0,0));
     
 /*    
     txfValue.setColor( ControlP5.CP5BLUE );
     txfComment.setColor( ControlP5.CP5BLUE );
 */
-    togEntryActive.setColor( ControlP5.CP5BLUE );
-  
+    togEntryActive.setColor( ControlP5.CP5BLUE )
+         .setColorBackground(color(255, 20))
+         .setColorForeground(color(255, 100,0));
+
     btnEditCancel.setColor( ControlP5.CP5BLUE );
     btnEditSave.setColor( ControlP5.CP5BLUE );
 
@@ -678,22 +701,10 @@ public void btnEditCreate(int theValue) {
   if ( cg.haveNoValue() ) {
     ConfEntry activeCE = cg.getFirstActive();
     if ( activeCE != null )
-      if ( ! ( activeCE.equals( ce ) ) ) {
-        blnWithActive = false;
-      }    
+      blnWithActive = false;
   }
 
-  String dummyLine = "    ";
-  if ( ! blnWithActive ) {
-    dummyLine += "//";
-  }
-  dummyLine += SL_SETTING;
-  if ( cg.haveSameName() ) {
-    dummyLine += ce.getName();
-  } else {
-    dummyLine += DUMMY_NAME;
-  }
-  actEditCE = new ConfEntry(g_config, dummyLine);
+  actEditCE = cg.createEntry();
   setEditorFieldsFromEntry( actEditCE );
 
   isCreateEditor = true;
@@ -736,10 +747,13 @@ public void btnEditRemove(int theValue) {
   
   // rebuild list
   g_config.rebuild();
+  g_config.setModified( true );
+  setWriteReminder();
 
   // refresh
   if ( groupDel )
     updateSection( drpSection.getId() );
   else 
     updateGroup( drpGroup.getId() );
-}  
+}
+

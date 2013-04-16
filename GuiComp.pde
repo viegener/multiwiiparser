@@ -32,6 +32,7 @@
 Config g_CompConfig;
 ArrayList deltaList = new ArrayList();
 int G_SelectedId = -1;
+boolean G_IsLeft = false;
 
 /*********************************************************************************/
 
@@ -211,7 +212,6 @@ public void updateCompSection(LDropdownList eventDDLB, int newId) {
 /*************************************************************************************************/
 public void updateDeltaEntry(SelectListBox eventSLB, int newId) {
   int selId;
-  boolean isLeft;
   
   if ( ! isUpdateEnabled ) {
     return;
@@ -222,6 +222,10 @@ public void updateDeltaEntry(SelectListBox eventSLB, int newId) {
   }
   
   if ( newId >= 0 ) {
+    if ( newId >= eventSLB.itemCount() ) {
+      newId = eventSLB.itemCount()-1;
+    }
+
     eventSLB.setId(newId);
     eventSLB.setActiveValue(newId);
     G_SelectedId = newId;
@@ -232,10 +236,10 @@ public void updateDeltaEntry(SelectListBox eventSLB, int newId) {
   de = ((DeltaEntry) deltaList.get(G_SelectedId));
   if ( eventSLB == lstEntryLeft ) {
     aCE = de.getLeft();
-    isLeft = true;
+    G_IsLeft = true;
   } else {
     aCE = de.getRight();
-    isLeft = false;
+    G_IsLeft = false;
   }
   
   // select corresponding entry in section dropdown
@@ -264,7 +268,237 @@ public void updateDeltaEntry(SelectListBox eventSLB, int newId) {
   }   
   isUpdateEnabled = true;
   
+
+  // update buttons
+  updateDeltaButtons( de );
+  
+  // set group/subsection
+  txtGroupName.setText( ((ConfGroup) de.getRight().getParent()).getDisplayName() );
+
   // Update Details ?
   setEditorFieldsFromEntry( aCE );
+
+}
+
+
+/*************************************************************************************************/
+public void updateDeltaButtons(DeltaEntry de) {
+  if ( de.getLeft() == null ) {
+    btnAlignActive.hide();  
+    btnAlignValue.hide();  
+    btnAlignEntry.hide();  
+
+    if ( de.getRight() != null ) {
+      btnAlignAddRemove.show()
+          .setCaptionLabel( "  Add Entry" );    
+    } else {
+      btnAlignAddRemove.hide();
+    }
+
+  } else if ( de.getRight() == null ) {
+    btnAlignActive.hide();  
+    btnAlignValue.hide();  
+    btnAlignEntry.hide();  
+    btnAlignAddRemove.show()
+        .setCaptionLabel( "  Remove Entry" );    
+  } else if ( areEntriesEqual( de.getRight(), de.getLeft() ) ) {
+    btnAlignActive.hide();  
+    btnAlignValue.hide();  
+    btnAlignEntry.hide();  
+    btnAlignAddRemove.hide();  
+  } else {
+    if ( de.getRight().isActive() != de.getLeft().isActive() ) { 
+        btnAlignActive.show();
+        if ( de.getLeft().isActive() ) {
+          btnAlignActive.setCaptionLabel( "  DEactivate" );
+        } else {
+          btnAlignActive.setCaptionLabel( "  Activate" );
+        }
+    } else {
+        btnAlignActive.hide();
+    }    
+    if ( de.getRight().getValue().equals( de.getLeft().getValue() ) ) { 
+        btnAlignValue.hide();
+    } else {
+        btnAlignValue.show();
+        if ( ! de.getRight().hasValue() ) {
+          btnAlignValue.setCaptionLabel( "  Remove Value" );
+        } else {
+          btnAlignValue.setCaptionLabel( "  Align Value" );
+        }
+    }    
+    btnAlignEntry.show()
+        .setCaptionLabel( "  Align" );    
+    btnAlignAddRemove.hide();  
+  }
+}
+
+
+/*************************************************************************************************/
+/****************  Buttons                                                                 *******/
+/*************************************************************************************************/
+
+
+/*************************************************************************************************/
+public void btnAlignActive(int theValue) {
+
+  ConfEntry aCE = null;
+  DeltaEntry de = ((DeltaEntry) deltaList.get(G_SelectedId));
+  
+  de.getLeft().setActiveWithValidation( de.getRight().isActive() );
+  g_config.setModified( true );
+  
+  updateOnAlign();
+}
+
+
+/*************************************************************************************************/
+public void btnAlignValue(int theValue) {
+
+  ConfEntry aCE = null;
+  DeltaEntry de = ((DeltaEntry) deltaList.get(G_SelectedId));
+  
+  if ( de.getLeft().setValueWithValidation( de.getRight().getValue() ) ) {
+    g_config.setModified( true );
+
+    updateOnAlign();
+  }
+}
+
+/*************************************************************************************************/
+public void btnAlignEntry(int theValue) {
+
+  ConfEntry aCE = null;
+  DeltaEntry de = ((DeltaEntry) deltaList.get(G_SelectedId));
+  
+  int choice = JOptionPane.showConfirmDialog(null,
+      "Copy entry completely from right (including comment) ?", "Align Entry", 
+      JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+  if ( ( choice == JOptionPane.CANCEL_OPTION ) || ( choice == JOptionPane.NO_OPTION ) ) { 
+    return;
+  }
+
+  aCE = de.getLeft();
+
+  if ( aCE.setValueWithValidation( de.getRight().getValue() ) ) {
+    aCE.setActiveWithValidation( de.getRight().isActive() );
+    aCE.setLineComment( de.getRight().getLineComment() );
+
+    g_config.setModified( true );
+
+    updateOnAlign();
+  }
+}
+
+
+
+/*************************************************************************************************/
+public void btnAlignAddRemove(int theValue) {
+  boolean modified = false;
+  DeltaEntry de = ((DeltaEntry) deltaList.get(G_SelectedId));
+  ConfEntry sourceCE = de.getRight();
+  
+  if ( de.getLeft() == null ) {
+    ConfEntry aCE = null;
+
+    // add entry
+    println("Add Entry ");
+    // adding entry means first identifying the corresponding section (by ID) --> or last section
+    // then identifying group by name --> or add that group
+    ConfGroup rightCG = (ConfGroup) de.getRight().getParent();
+    ConfGroup cg = null;
+    String groupName = rightCG.getName();
+    
+    for (int i = 0 ; i < g_config.size(); i++) {
+      // Section
+      ConfObject cs = g_config.get(i);
+      for (int j = 0 ; j < cs.mList.size(); j++) {
+        cg = (ConfGroup) cs.get(j);
+        if ( groupName.equals( cg.getName() ) ) {
+          println("found and add to group ");
+          modified = true;
+        }
+      }
+    }
+
+/*  
+    if ( ! modified ) {
+      println("NOT found and add to group ");
+      modified = true;
+
+      ConfObject cs = g_config.get(g_config.size()-1);
+      cg = new ConfGroup( g_config, rightCG.getSubsectionName(), rightCG.getName() );
+      cs.add( cg );
+    }
+*/
+
+    if ( modified ) {
+      // add new entry
+      aCE = cg.createEntry();
+      cg.add( aCE );          
+  
+      // Change entry
+      aCE.setModified(true);
+      aCE.setActive( sourceCE.isActive() );
+      aCE.setName(  sourceCE.getName() );
+      aCE.setValue( sourceCE.getValue() );
+      aCE.setLineComment( sourceCE.getLineComment() );
+    } else {
+      JOptionPane.showMessageDialog(null,
+          "Group not found no entry added", "Add entry faileds", 
+          JOptionPane.ERROR_MESSAGE);
+    }
+    
+  } else {
+    // remove entry
+
+    int choice = JOptionPane.showConfirmDialog(null,
+        "Are you sure you want to delete the current entry (\"" + de.getLeft().getName() + "\") ?", "Remove Entry", 
+        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    if ( ( choice == JOptionPane.CANCEL_OPTION ) || ( choice == JOptionPane.NO_OPTION ) ) { 
+      return;
+    }
+
+    ConfGroup cg = (ConfGroup) de.getLeft().getParent();
+    for (int i = 0 ; i < cg.size(); i++) {
+      if ( de.getLeft().equals( ((ConfEntry) cg.get(i)) ) ) {
+        cg.remove(i);
+        modified = true;
+      }
+    }
+  }
+  if ( modified ) {
+    g_config.setModified( true );
+
+    updateOnAlign();
+  }
+}
+
+
+
+/*************************************************************************************************/
+public void updateOnAlign() {
+
+  boolean isLeft = G_IsLeft;
+  int selId = G_SelectedId;
+
+//  println("Scrollposition: " + lstEntryRight.getScrollPosition() );
+  float sp = lstEntryRight.getScrollPosition();
+
+
+  g_config.rebuild();
+  updateGroup( -1 );
+  
+
+  updateCompLists();
+  if ( isLeft ) {
+    updateDeltaEntry(lstEntryLeft,selId);
+  } else {
+    updateDeltaEntry(lstEntryRight,selId);
+  }
+
+  lstEntryRight.scroll( 1-sp );
+
+  setWriteReminder();
 }
 

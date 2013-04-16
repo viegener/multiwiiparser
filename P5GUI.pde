@@ -101,6 +101,7 @@ LTextfield txfCompareFile;
 Button btnAddToFavorites;
 Button btnSelectFile;
 Button btnCleanFile;
+Button btnRestoreFiles;
 
 Button btnCompAddToFavorites;
 Button btnSelectCompFile;
@@ -114,6 +115,7 @@ Button btnFileSave;
 Button btnFileCancel;
 Button btnFileRemove;
 Button btnFavoritesSave;
+Button btnFileOpen;
 
 /***************************/
 
@@ -126,6 +128,14 @@ InToggle togCompareActive;
 
 LDropdownList  drpLCSection;
 LDropdownList  drpRCSection;
+
+Button btnAlignActive;
+Button btnAlignValue;
+Button btnAlignEntry;
+Button btnAlignAddRemove;
+
+Textarea txtGroupName; 
+Textlabel lblGroupName;
 
 /***************************/
 
@@ -155,8 +165,8 @@ public void initializeGUI() {
   
   /***************************/
 
-  int LabelXPos = 11;
-  int ControlXPos = 92;
+  int LabelXPos = 10;
+  int ControlXPos = 90;
   int AdditionalXPos = 630;
 
   int SectionYPos = 40;
@@ -346,6 +356,8 @@ public void initializeGUI() {
      .setValue(false)
      .lock()
      .moveTo( tabDetails )
+         .setColorBackground(color(255, 20))
+         .setColorForeground(color(255, 100,0))
      ;
 
   txfValue = new LTextfield( cp5, "txfValue" );
@@ -380,6 +392,7 @@ public void initializeGUI() {
      .setCaptionLabel( "   Edit" )
      .moveTo( tabDetails )
      ;
+  cp5.getTooltip().register("btnEditSave","Or double click entry to edit");
 
   btnEditCancel = cp5.addButton("btnEditCancel")
      .setPosition(btnEditSave.getPosition().x+btnEditSave.getWidth()+20,ButtonYPos)
@@ -442,7 +455,6 @@ public void initializeGUI() {
   /********* DEFAULT *****************/
   /***********************************/
 
-
   txfFilename = new LTextfield( cp5, "txfFilename" );
   txfFilename.setPosition(ControlXPos, SectionYPos)
     .setSize(550,20)
@@ -475,6 +487,13 @@ public void initializeGUI() {
      .setPosition(ControlXPos + btnAddToFavorites.getWidth() + 10 + btnSelectFile.getWidth() + 10,SectionYPos + 30)
      .setSize(100,20)
      .setCaptionLabel( "   Clear " )
+     .moveTo( tabDefault )
+     ;
+
+  btnRestoreFiles = cp5.addButton("btnRestoreFiles")
+     .setPosition(AdditionalXPos,SectionYPos + 30)
+     .setSize(120,20)
+     .setCaptionLabel( "  Restore Files " )
      .moveTo( tabDefault )
      ;
 
@@ -589,6 +608,22 @@ public void initializeGUI() {
      .moveTo( tabDefault )
      ;
 
+  btnFileRemove = cp5.addButton("btnFileRemove")
+     .setPosition(btnFileCancel.getPosition().x+btnFileCancel.getWidth() + 50,ButtonYPos)
+     .setSize(80,20)
+     .setCaptionLabel( "   Remove" )
+     .moveTo( tabDefault )
+     ;
+
+  btnFileOpen = cp5.addButton("btnFileOpen")
+     .setPosition(btnFileRemove.getPosition().x+btnFileRemove.getWidth()+50,ButtonYPos)
+     .setSize(120,20)
+     .setCaptionLabel( "   Load favorite" )
+     .moveTo( tabDefault )
+     ;
+  cp5.getTooltip().register("btnFileOpen","Or double click entry to load");
+
+
   btnFavoritesSave = cp5.addButton("btnFavoritesSave")
      .setPosition(AdditionalXPos,ButtonYPos)
      .setSize(120,20)
@@ -597,23 +632,15 @@ public void initializeGUI() {
      ;
   if (CONFIG_AUTOSAVE_FAVORITES ) btnFavoritesSave.hide();
 
-  btnFileRemove = cp5.addButton("btnFileRemove")
-     .setPosition(btnFileCancel.getPosition().x+btnFileCancel.getWidth() + 50,ButtonYPos)
-     .setSize(80,20)
-     .setCaptionLabel( "   Remove" )
-     .moveTo( tabDefault )
-     ;
-
 
   /***********************************/
   /********* COMPARE *****************/
   /***********************************/
 
-
   /***************************/
-  int LeftXPos = 100;
-  int MiddleXPos = 400;
-  int RightXPos = 450;
+  int LeftXPos = 90;
+  int MiddleXPos = 390;
+  int RightXPos = 440;
 
   /***************************/
 
@@ -621,7 +648,7 @@ public void initializeGUI() {
   lstEntryLeft.setLabelText("Entry   ")
          .setActiveSync( false )
          .setPosition(LeftXPos, GroupYPos)
-         .setSize(300, 260)
+         .setSize(300, 230)
          .setItemHeight(15)
          .setBarHeight(15)
          .setScrollbarVisible( true )
@@ -639,7 +666,7 @@ public void initializeGUI() {
   lstEntryInfo.setLabelText("")
          .setActiveSync( false )
          .setPosition(MiddleXPos+5, GroupYPos)
-         .setSize(40, 260)
+         .setSize(40, 230)
          .setItemHeight(15)
          .setBarHeight(15)
          .setScrollbarWidth(0)
@@ -658,7 +685,7 @@ public void initializeGUI() {
   lstEntryRight.setLabelText("")
          .setActiveSync( false )
          .setPosition(RightXPos, GroupYPos)
-         .setSize(300, 260)
+         .setSize(300, 230)
          .setItemHeight(15)
          .setBarHeight(15)
          .setScrollbarVisible( true )
@@ -680,7 +707,21 @@ public void initializeGUI() {
   lstEntryInfo.addOthers( arrSLB2 );
   lstEntryRight.addOthers( arrSLB2 );
 
-
+  txtGroupName = new Textarea(cp5, "txtGroupName")
+                  .setPosition(ControlXPos, GroupYPos+230+10)
+                  .setSize(405, 20)
+                  .setFont(pfont)
+                  .disableColorBackground()
+                  .hideScrollbar()
+                  .setLineHeight(pfont_height+4)
+                  .moveTo( tabCompare )
+                  ;
+  lblGroupName = cp5.addTextlabel("lblGroupName")
+    .setText( "             Group " )
+    .setPosition( LabelXPos, GroupYPos+230+10 )
+    .moveTo( tabCompare )
+    ;
+  
   /******** TOGGLE for Special displays */
   drpLCSection = new LDropdownList( cp5, "drpLCSection", LeftXPos, GroupYPos, 300, 100);
   drpLCSection.setLabelText( "Section " )
@@ -702,7 +743,6 @@ public void initializeGUI() {
      .setColorForeground(color(255, 100,0))
         ; 
 
-
   /******** TOGGLE for Special displays */
   togCompareDiff = new InToggle( cp5, "togCompareDiff");
   togCompareDiff.setPosition(AdditionalXPos,SectionYPos-(pfont_height+4) )
@@ -721,9 +761,48 @@ public void initializeGUI() {
      ;
      
 
+  /******** Buttons */
+  btnAlignActive = cp5.addButton("btnAlignActive")
+     .setPosition(ControlXPos,ButtonYPos)
+     .setSize(100,20)
+     .setCaptionLabel( "  Activate" )
+     .moveTo( tabCompare )
+     ;
+
+  btnAlignValue = cp5.addButton("btnAlignValue")
+     .setPosition(btnAlignActive.getPosition().x+btnAlignActive.getWidth() + 20,ButtonYPos)
+     .setSize(100,20)
+     .setCaptionLabel( "  Copy Value" )
+     .moveTo( tabCompare )
+     ;
+
+  btnAlignEntry = cp5.addButton("btnAlignEntry")
+     .setPosition(btnAlignValue.getPosition().x+btnAlignValue.getWidth() + 20,ButtonYPos)
+     .setSize(100,20)
+     .setCaptionLabel( "  Copy" )
+     .moveTo( tabCompare )
+     ;
+
+  btnAlignAddRemove = cp5.addButton("btnAlignAddRemove")
+     .setPosition(btnAlignEntry.getPosition().x+btnAlignEntry.getWidth() + 20,ButtonYPos)
+     .setSize(100,20)
+     .setCaptionLabel( "  Add/Remove" )
+     .moveTo( tabCompare )
+     ;
+
+
+
+  /***********************************/
+  /********* Tooltips ****************/
+  /***********************************/
+
+  cp5.getTooltip().setDelay(500);
+  cp5.getTooltip().setPositionOffset(10,-20);
+
   /***********************************/
   /*********  *****************/
   /***********************************/
+
 
   // add mousewheel support, now hover the slide with your mouse
   // and use the mousewheel (or trackpad on a macbook) to change the 
@@ -804,16 +883,27 @@ public void makeTabReady( Tab aTab ) {
   if ( ( aTab == tabDetails ) || ( aTab == tabCompare ) ) {
     txfValue.moveTo( aTab );
     togEntryActive.moveTo( aTab );
+
+    btnWriteFull.moveTo( aTab );
+    btnWriteMinimal.moveTo( aTab );
+
   }
   txfName.moveTo( aTab );
   txfComment.moveTo( aTab );
   if ( aTab == tabDetails ) {
     updateEntry(-1);
   } else if ( aTab == tabCompare ) {
+    boolean isLeft = G_IsLeft;
+    int selId = G_SelectedId;
     updateCompLists();
-    updateDeltaEntry(null,-1);
+    if ( isLeft ) {
+      updateDeltaEntry(lstEntryLeft,selId);
+    } else {
+      updateDeltaEntry(lstEntryRight,selId);
+    }
   } else if ( aTab == tabDefault ) {
-    updateFavEntry(-1);
+    updateFavorites( null );
+//    updateFavEntry(-1);
   }
 
 }

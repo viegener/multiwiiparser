@@ -30,8 +30,8 @@
 /*************************************************************************************************/
 
 
-static final String MWP_VERSION = "0.3";
-static final String MWP_REVISION = "2013/04/09"; 
+static final String MWP_VERSION = "pre 0.4";
+static final String MWP_REVISION = "2013/04/16"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
@@ -39,20 +39,12 @@ static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes 
 
 
 /***************** TODO **********************************************************
-- DEFECT: Selection in Delta tab is not kept after tab change (back and forth)
-- DEFECT: Selection in Files tab is not kept after tab change (back and forth)
+- add page down/up cursor up and down to tabs scrolling lists down
 
 - USABILITY: Fields aligned and better distributed 
-- USABILITY: Color coding --> Blue is interactive / grey is showing data / Red is focus for edit (Background ?)
-- USABILITY: Hide all buttons not active  
+- USABILITY: Hide all buttons not active --> 
 
-- DELTA: Show colors for changes (green added / red removed)
 - DELTA: Allow selection of single section for comparision
-
-* USECASE 5 - Apply modifications in delta list into config.h
-    -- TODO: Apply changes to a config.h (esp. haveSameName / noValue)
-    -- TODO: check for compliance on changes
-    -- TODO: Deactivate other entries if necessary (based on Groups)
 
 * USECASE 6 - Apply configurations and load to MultiWii
     -- TODO: Define and display a multiwii directory
@@ -60,17 +52,15 @@ static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes 
     -- TODO: Start arduino software for multiwii
     -- TODO: Validate also if Board and COM-Port can be changed beforehand
     
-* USECASE 7? - Open a config.h (as a template) and apply another config to it
-    -- TODO: Apply changes to a config.h including check fo compliance
-    -- TODO: Deactivate other entries if necessary (based on Groups)
-
 --------------------------------
 
+- Add help tab showing a document that gives some help
 - Add javadoc
 - DELTA and DETAILS: Check for unsaved modifications
-- USABILITY: Scrollbars in dropdown are not as expected (they should be only taking the invisible part into account)
+- USABILITY: Scrollbars in dropdown are not as expected (they should be only taking the invisible part into account) --> problem this is cp5, fixed length slides
 
 ---- NICE TO HAVE / IDEAS ------
+- DELTA: Show colors for changes (green added / red removed)
 - Allow search for entries
 - handle complex defines better ( parametereized values)
 - Allow resorting of entries in a group
@@ -81,6 +71,31 @@ static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes 
 
 =======================================================================================
 DONE:
+
+16.4.2013
+- On Write of config the filename needs to be adapted in file tab (possible check for same filename in compare?)
+- prepopulate file selection on save
+- Save last open files --> restore files button
+- DELTA: Show also group and subsection name for entry to simplify search
+- Ask for confirmation on remove of entry
+- Copy Entry --> only when both entries there and different
+- DELTA: Add remove entry
+- Add all same name values even inactive ones to all lists
+- Defect: After changing delta the list shows the beginning of the list although scrollbar is showing last position 
+- DELTA: Allow alignment of values
+- DELTA: Allow de-/activation of entries
+- DELTA: Add write/Write minimal also on comp screen
+- DELTA: Make sure that modified is set on comp changes
+- ALIGN: Buttons for active, value, complete align und add/del shown in Comp when appropriate
+- USABILITY: Color coding --> Blue is interactive / grey is showing data / Red is focus for edit (Background ?)
+- DEFECT: Selection in Delta tab is not kept after tab change (back and forth)
+- Add text to show that double click will open favorite
+- Let doubleclick also start edit on entry
+- Add button for selection of favorite
+- aligned controls on all tabs
+- Color for active checkbox grey if not active
+- colors will be completely reset after edit
+
 
 08.4.2013
 - Add Header for Copyright and License to source

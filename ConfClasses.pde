@@ -123,9 +123,14 @@ class ConfObject {
     mBlockEnd = aEnd;
   }
   
-  /************** getmParent ************************/
+  /************** getParent ************************/
   ConfObject getParent() {
     return mParentConfObject;
+  }
+
+  /************** getRoot ************************/
+  Config getRoot() {
+    return mRootConfig;
   }
 
   /************** size ************************/
@@ -373,6 +378,19 @@ class ConfEntry extends ConfObject {
   }
 
 
+  void setActiveWithValidation(boolean newActive) {
+    if ( ( newActive ) && ( getParent() != null ) ) {
+      ConfGroup cg = (ConfGroup) getParent();
+      if ( cg.haveSameName() ) {
+        for (int i = 0 ; i < cg.size(); i++) {
+          ((ConfEntry) cg.get(i)).setActive( false );
+        }
+      }
+    }
+    setActive( newActive );
+  }
+
+
 
   /************** printIt ************************/
   void printIt() {
@@ -402,6 +420,15 @@ class ConfEntry extends ConfObject {
     return text;
   }
 
+  /************** getSortName ************************/
+  String getSortName() {
+    String text = mName;
+      
+    if ( mHasValue ) 
+      text += mValue;
+    return text;
+  }
+
   /************** Value ************************/
   boolean hasValue() {
     return (mValue.length() > 0);
@@ -415,6 +442,21 @@ class ConfEntry extends ConfObject {
     mValue  = aValue;
   }
   
+  boolean setValueWithValidation(String aValue) {
+    if ( getParent() != null ) {
+      if ( ( getParent().haveNoValue() ) && ( aValue.length() > 0 ) ) {
+        JOptionPane.showMessageDialog(null,
+            "No values allowed in this group (HaveNoValue)", "Entry validation failed", 
+            JOptionPane.ERROR_MESSAGE);
+        return false;
+      }
+    }
+    setValue( aValue );
+    return true;
+  }
+
+
+
   /************** getStatusText ************************/
   String getStatusText() {
     String text = " ";
@@ -518,6 +560,33 @@ class ConfGroup  extends ConfObject {
   }
 
 
+  /************** createEntry --> Attention will not be added ************************/
+  ConfEntry createEntry() {
+    // create in haveNoValue --> Means: Can not be active if another active entry is existing / no value
+    boolean blnWithActive = true;
+  
+    if ( haveNoValue() ) {
+      ConfEntry activeCE = getFirstActive();
+      if ( activeCE != null )
+        blnWithActive = false;
+    }
+  
+    String dummyLine = "    ";
+    if ( ! blnWithActive ) {
+      dummyLine += "//";
+    }
+    dummyLine += SL_SETTING;
+    if ( ( haveSameName() ) && ( size() > 0 ) ) {
+      dummyLine += get(0).getName();
+    } else {
+      dummyLine += DUMMY_NAME;
+    }
+    
+    return new ConfEntry(getRoot(), dummyLine);
+  }
+
+
+
   /************** getFirstActive ************************/
   ConfEntry getFirstActive() {
     for (int i = 0 ; i < mList.size(); i++) {
@@ -525,7 +594,7 @@ class ConfGroup  extends ConfObject {
          return ((ConfEntry) mList.get(i));
       }
     }
-  return null;
+    return null;
   }
 
 
@@ -724,16 +793,10 @@ class Config extends ConfObject {
         // ConfGroup
         ConfObject cg = cs.get(j);
         if ( cg.mHaveSameName ) {
-          // Add only one entry for mHaveSameName groups
-          // find if active entry
+          // Add only one entry for mHaveSameName groups --> not anymore!!
           for (int k = 0 ; k < cg.mList.size(); k++) {
             addSorted( (ConfEntry) cg.get(k), true );
           }
-/*
-          if ( cg.size() > 0 ) {
-            addSorted( (ConfEntry) cg.get(0), false );
-          }
-*/
         } else {
           for (int k = 0 ; k < cg.mList.size(); k++) {
             addSorted( (ConfEntry) cg.get(k), cg.mIsMixed );
@@ -747,31 +810,38 @@ class Config extends ConfObject {
   /************** addSorted ************************/
   void addSorted(ConfEntry ce, boolean acceptDuplicate) {
     String aName = ce.getName();
+    String aSortName = ce.getSortName();
     int i = 0;
 
     while ( ( i < mSortedNames.size() ) && ( aName.compareTo( ((ConfEntry) mSortedNames.get(i)).getName() ) > 0 ) ) {
       i++;
     }
-    if ( ! ( i < mSortedNames.size() ) ) {
+    if ( i >= mSortedNames.size() ) {
       // append at the end if nothing smaller found
       mSortedNames.add( ce );
     } else if ( aName.equals( ((ConfEntry) mSortedNames.get(i)).getName() ) ) {
-      // Duplicate
 
+      // name equal --> so check for duplicates first
       if ( ! acceptDuplicate ) {
         println("!!Error!! Duplicate entry name :" +  aName );
         exit();
       }
-      
-      if ( ce.isActive() ) {
-        // if other entry is also active --> This is a mistake
-        if ( ((ConfEntry) mSortedNames.get(i)).isActive() ) {
-          println("!!Error!! Duplicate Active entry name  :" +  aName );
-          exit();
-        }
 
-        // If active replace
+      // scroll through all with same name and check for duplicates find correct position
+      int pos = -1;
+      while ( ( i < mSortedNames.size() ) && ( aName.compareTo( ((ConfEntry) mSortedNames.get(i)).getName() ) == 0 ) ) {
+        if ( aSortName.compareTo( ((ConfEntry) mSortedNames.get(i)).getSortName() ) < 0 ) {
+          pos = i;
+        }
+        i++;
+      }
+
+      if ( pos == -1 ) {
+        mSortedNames.add( ce );
+      } if ( i < mSortedNames.size() ) {
         mSortedNames.set( i, ce );
+      } else {
+        mSortedNames.add( ce );
       }
 
     } else {

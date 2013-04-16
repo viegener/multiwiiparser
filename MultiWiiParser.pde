@@ -58,6 +58,11 @@
     -- Show last filenames used or favories
     -- Assign a comment for a filename
 
+* USECASE 5 - Align modifications in delta list into config.h
+    -- Apply changes to a config.h (esp. haveSameName / noValue)
+    -- Apply all delta to a config.h including check fo compliance
+
+
   
 -------------------------------------
 /*************************************************************************************************/
@@ -135,7 +140,7 @@ void setup(){
   Config aConfig = null;
  
   if ( CONFIG_START_WITH_FILESELECTION )
-    aConfig = readAConfig(null);
+    aConfig = readAConfig(null,"");
 
   g_config = null;
 

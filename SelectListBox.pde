@@ -320,6 +320,9 @@ public class SelectListBox extends ListBox {
     return items.size();
   }
 
+  public void updateScroll() { 
+    super.updateScroll();
+  }
 
   public SelectListBox setActiveSync(boolean aVal) {
     isActiveSync = aVal;

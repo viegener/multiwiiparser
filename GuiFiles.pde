@@ -83,6 +83,8 @@ class FavoriteFile {
 
 class Favorites {
   ArrayList<FavoriteFile> mList;
+  
+  protected String lastFile1, lastFile2;
  
   Favorites() {
     mList = new ArrayList<FavoriteFile>();
@@ -100,19 +102,26 @@ class Favorites {
   
     if ( strings == null ) return;
     if ( ( strings.length % 2 ) == 1 ) return;
+    
+    if ( strings.length >= 2 ) {
+      lastFile1 = strings[0];
+      lastFile2 = strings[1];
   
-    mList.clear();
-    for (int i=0; i <  strings.length; i+=2 ) {
-      mList.add( new FavoriteFile( new File( strings[i] ), strings[i+1] ) );    
+      mList.clear();
+      for (int i=2; i <  strings.length; i+=2 ) {
+        mList.add( new FavoriteFile( new File( strings[i] ), strings[i+1] ) );    
+      }
     }
   }
 
   public void saveFavorites()
   {
-    String[] strings = new String[g_Favorites.size() * 2];
+    String[] strings = new String[2+(g_Favorites.size() * 2)];
+    strings[0] = lastFile1;
+    strings[1] = lastFile2;
     for (int i=0; i <  mList.size(); i++) {
-      strings[(i*2)] = mList.get(i).getPath();
-      strings[(i*2)+1] = mList.get(i).getComment();
+      strings[(i*2)+2] = mList.get(i).getPath();
+      strings[(i*2)+1+2] = mList.get(i).getComment();
     }
   
     saveStrings( FAVORITE_FILE_NAME, strings );
@@ -155,6 +164,27 @@ class Favorites {
     if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
   }
 
+  /************** getCmmment ************************/
+  void setFile(int id, String aFile) {
+    if ( id == 1 ) {
+      lastFile1 = aFile;
+      if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
+    } else if ( id == 2 ) {
+      lastFile2 = aFile;
+      if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
+    }
+  }
+
+  /************** getCmmment ************************/
+  String getFile(int id ) {
+    if ( id == 1 ) {
+      return lastFile1;
+    } else if ( id == 2 ) {
+      return lastFile2;
+    }
+    return null;
+  }
+
 
 
 }
@@ -165,7 +195,7 @@ class Favorites {
 /****************  File selection                                                          *******/
 /*************************************************************************************************/
 
-Config readAConfig( String givenFileName ) {
+Config readAConfig( String givenFileName, String preSelectName ) {
   Config config = null;
   
   if ( givenFileName != null ) {
@@ -179,7 +209,14 @@ Config readAConfig( String givenFileName ) {
   } else {
     g_file = null;
     isFileSelected = false;
-    selectInput( "Select a config.h file", "fileSelected" );
+
+    if ( preSelectName.length() > 0 ) {
+      File preFile = new File( preSelectName );
+
+      selectInput( "Select a config.h file", "fileSelected", preFile );
+    } else {
+      selectInput( "Select a config.h file", "fileSelected" );
+    }
 
     // wait for file selected (ouch)
     while ( ! isFileSelected ) {
@@ -197,7 +234,7 @@ Config readAConfig( String givenFileName ) {
 
 
 
-void writeAConfig( boolean doMinimal ) {
+void writeAConfig( boolean doMinimal, String preFilename ) {
   g_file = null;
   
   String prpart = "";
@@ -206,7 +243,14 @@ void writeAConfig( boolean doMinimal ) {
   }
 
   isFileSelected = false;
-  selectOutput( "Select an Output File to store" + prpart + " config file", "fileSelected" );
+  
+  if ( preFilename.length() > 0 ) {
+    File preFile = new File( preFilename );
+    
+    selectOutput( "Select an Output File to store" + prpart + " config file", "fileSelected", preFile );
+  } else {
+    selectOutput( "Select an Output File to store" + prpart + " config file", "fileSelected" );
+  }
 
   while ( ! isFileSelected ) {
     delay(200);
@@ -219,11 +263,14 @@ void writeAConfig( boolean doMinimal ) {
     } else {
       configText = (String[] ) g_config.getOriginalText().toArray( new String[] {} );
     }
-  
+    
     saveStrings(g_file.getAbsolutePath(), configText );
-    isConfigModified = false;
-    setWriteReminder();
+    g_config.setModified( false );
+    if ( ! doMinimal ) {
+      g_config.setName( g_file.getAbsolutePath() );
     }
+    setWriteReminder();
+  }
 }
 
 
@@ -241,11 +288,16 @@ void fileSelected( File aFile ) {
 public void btnSelectFile(int theValue) {
   if ( isFileEditMode ) return;
 
-  Config aConfig = readAConfig(null);
+  String predefName = "";
+  if ( g_config != null ) {
+    predefName = g_config.getName();
+  }
+  Config aConfig = readAConfig(null, predefName);
 
   if ( aConfig != null ) {
     g_CompConfig = null;
     updateConfig( aConfig );
+    g_Favorites.setFile(1, aConfig.getName() );
     updateFavorites( null );
   }
 }
@@ -268,10 +320,15 @@ public void btnCleanFile(int theValue) {
 public void btnSelectCompFile(int theValue) {
   if ( isFileEditMode ) return;
 
-  Config aConfig = readAConfig(null);
+  String predefName = "";
+  if ( g_CompConfig != null ) {
+    predefName = g_CompConfig.getName();
+  }
+  Config aConfig = readAConfig(null, predefName);
 
   if ( aConfig != null ) {
     updateCompConfig( aConfig );
+    g_Favorites.setFile(2, aConfig.getName() );
     updateFavorites( null );
   }
 }
@@ -329,6 +386,7 @@ public void btnFileRemove(int theValue) {
     updateFavorites( actId );      
   }
 }
+
 
 
 
@@ -409,20 +467,8 @@ public void updateFavEntry(int newId) {
 
     if ( isCurrentlyDoubleClick ) {
       isCurrentlyDoubleClick = false;
-      // on DOuble Click fill in to either next empty slot or last selected
-      Config aConfig = readAConfig(g_Favorites.getPath(newId));
-
-      if ( aConfig != null ) {
-        if ( g_config == null ) {
-          g_CompConfig = null;
-          updateConfig( aConfig );
-          updateFavorites( null );
-        } else {
-          g_CompConfig = null;
-          updateCompConfig( aConfig );
-          updateFavorites( null );
-        }
-      }
+      // open favorite
+      btnFileOpen( 0 );
     }
 
   }
@@ -567,7 +613,53 @@ public void btnFileCancel(int theValue) {
   }
 }
 
+/*************************************************************************************************/
+public void btnFileOpen(int theValue) {
+  if ( isFileEditMode ) return;
+
+  int actId = lstFilePath.getId();
+  if ( actId == -1 ) return;
+
+  // on DOuble Click fill in to either next empty slot or last selected
+  Config aConfig = readAConfig(g_Favorites.getPath(actId),"");
+
+  if ( aConfig != null ) {
+    if ( g_config == null ) {
+      g_CompConfig = null;
+      updateConfig( aConfig );
+      g_Favorites.setFile(1, aConfig.getName() );
+      updateFavorites( null );
+    } else {
+      g_CompConfig = null;
+      updateCompConfig( aConfig );
+      g_Favorites.setFile(2, aConfig.getName() );
+      updateFavorites( null );
+    }
+  }
+}
 
 
+/*************************************************************************************************/
+public void btnRestoreFiles(int theValue) {
+  if ( isFileEditMode ) return;
 
+  // on DOuble Click fill in to either next empty slot or last selected
+  Config aConfig = readAConfig(g_Favorites.getFile(1),"");
+
+  if ( aConfig != null ) {
+    g_CompConfig = null;
+    updateConfig( aConfig );
+    g_Favorites.setFile(1, aConfig.getName() );
+    updateFavorites( null );
+
+    Config bConfig = readAConfig(g_Favorites.getFile(2),"");
+
+    g_CompConfig = null;
+    if ( bConfig != null ) {
+      updateCompConfig( bConfig );
+      g_Favorites.setFile(2, bConfig.getName() );
+      updateFavorites( null );
+    }
+  }
+}
 
