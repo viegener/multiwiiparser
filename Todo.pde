@@ -30,21 +30,15 @@
 /*************************************************************************************************/
 
 
-static final String MWP_VERSION = "pre 0.4";
-static final String MWP_REVISION = "2013/04/16"; 
+static final String MWP_VERSION = "0.4";
+static final String MWP_REVISION = "2013/04/18"; 
 
 static final String MULTIWII_PARSER_TITLE_REV = "MultiWiiParser V" + MWP_VERSION + " - " + MWP_REVISION; 
 
 static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes Viegener";
 
-
 /***************** TODO **********************************************************
-- add page down/up cursor up and down to tabs scrolling lists down
-
 - USABILITY: Fields aligned and better distributed 
-- USABILITY: Hide all buttons not active --> 
-
-- DELTA: Allow selection of single section for comparision
 
 * USECASE 6 - Apply configurations and load to MultiWii
     -- TODO: Define and display a multiwii directory
@@ -56,10 +50,10 @@ static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes 
 
 - Add help tab showing a document that gives some help
 - Add javadoc
-- DELTA and DETAILS: Check for unsaved modifications
 - USABILITY: Scrollbars in dropdown are not as expected (they should be only taking the invisible part into account) --> problem this is cp5, fixed length slides
 
 ---- NICE TO HAVE / IDEAS ------
+- DELTA: Allow selection of single section for comparision
 - DELTA: Show colors for changes (green added / red removed)
 - Allow search for entries
 - handle complex defines better ( parametereized values)
@@ -71,6 +65,15 @@ static final String MULTIWII_PARSER_COPYRIGHT = "Copyright (C) 2013 by Johannes 
 
 =======================================================================================
 DONE:
+
+18.4.2013 - V0.4
+- DEFECT: Field colors not fully reset from edit in File (when changing tabs)
+- DEFECT: Emtpy favorites list still allows Load favorites and edit --> exception --> Solution: Dummy entry
+- Added documentation (word / html)
+- add page down/up cursor up and down to tabs scrolling lists down
+- add Shift pos1/end to scrolling lists to the beginning / end
+- DEFECT: Sorting of entries with same name corrected
+
 
 16.4.2013
 - On Write of config the filename needs to be adapted in file tab (possible check for same filename in compare?)

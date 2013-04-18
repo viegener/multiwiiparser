@@ -88,6 +88,9 @@ class Favorites {
  
   Favorites() {
     mList = new ArrayList<FavoriteFile>();
+    if ( mList.size() == 0 ) {
+        mList.add( new FavoriteFile(  new File( "config.h" ), "" ) );    
+    }
   }
 
   /***********************/
@@ -112,6 +115,11 @@ class Favorites {
         mList.add( new FavoriteFile( new File( strings[i] ), strings[i+1] ) );    
       }
     }
+
+    if ( mList.size() == 0 ) {
+        mList.add( new FavoriteFile(  new File( "config.h" ), "" ) );    
+    }
+
   }
 
   public void saveFavorites()
@@ -136,6 +144,9 @@ class Favorites {
   public void delFavorite( int idxToDel ) {
     if ( ( idxToDel >= 0 ) && ( idxToDel < g_Favorites.size() ) ) {
       mList.remove( idxToDel );
+      if ( mList.size() == 0 ) {
+          mList.add( new FavoriteFile(  new File( "config.h" ), "" ) );    
+      }
       if (CONFIG_AUTOSAVE_FAVORITES ) saveFavorites();
     }
   }
@@ -379,6 +390,7 @@ public void btnFileRemove(int theValue) {
   if ( isFileEditMode ) return;
 
   int actId = lstFilePath.getId();
+//  println("actID " + actId );
   if ( ( actId >= 0 ) && ( actId < g_Favorites.size() ) ) {
     g_Favorites.delFavorite( actId );
     if ( actId == g_Favorites.size() )
@@ -474,10 +486,10 @@ public void updateFavEntry(int newId) {
   }
 
   int actId = lstFilePath.getId();
-  if ( ( actId >= 0 ) && ( actId < lstFilePath.itemCount() ) ) {
+//  if ( ( actId >= 0 ) && ( actId < lstFilePath.itemCount() ) ) {
     if ( lastTab == tabDefault )
       setEditorFieldsFromFavorite( actId );
-  }
+//  }
 
 }
 
@@ -556,7 +568,9 @@ public void finalizeCommEdit(boolean doSave) {
   if ( isEnded ) {
     txfComment.lock();
 
-    txfComment.setColor( ControlP5.CP5BLUE );
+    txfComment.setColor( ControlP5.CP5BLUE )
+     .setColorBackground(color(255, 20))
+     .setColorForeground(color(0, 0,0));
   
     btnFileCancel.setColor( ControlP5.CP5BLUE );
     btnFileSave.setColor( ControlP5.CP5BLUE );
@@ -598,7 +612,10 @@ public void btnFileSave(int theValue) {
       updateFavorites( actId );
     }
   } else {
-    startFileEdit();
+    int actId = lstFilePath.getId();
+    if ( ( actId >= 0 ) && ( actId < g_Favorites.size() ) ) {
+      startFileEdit();
+    }
   }
 }
 

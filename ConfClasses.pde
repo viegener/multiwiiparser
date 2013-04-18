@@ -829,6 +829,7 @@ class Config extends ConfObject {
 
       // scroll through all with same name and check for duplicates find correct position
       int pos = -1;
+      int start = i;
       while ( ( i < mSortedNames.size() ) && ( aName.compareTo( ((ConfEntry) mSortedNames.get(i)).getName() ) == 0 ) ) {
         if ( aSortName.compareTo( ((ConfEntry) mSortedNames.get(i)).getSortName() ) < 0 ) {
           pos = i;
@@ -836,8 +837,8 @@ class Config extends ConfObject {
         i++;
       }
 
-      if ( pos == -1 ) {
-        mSortedNames.add( ce );
+      if ( pos != -1 ) {
+        mSortedNames.add( pos, ce );
       } if ( i < mSortedNames.size() ) {
         mSortedNames.set( i, ce );
       } else {

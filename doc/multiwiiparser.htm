@@ -1,0 +1,390 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 11 (filtered)">
+<title>MultiWiiParser Documentation</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+h1
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	page-break-after:avoid;
+	font-size:16.0pt;
+	font-family:Arial;}
+@page Section1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=Section1>
+
+<h1>Introduction</h1>
+
+<p class=MsoNormal>MultiwiiParser is a Processing application to handle
+config.h files for Multiwii based multirotor &quot;devices&quot;. For the user
+interface the ControlP5 library is used.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The idea for the program was to simplify the task to handle
+different configurations for all of my multicopters and incorporate the hand
+made configuration files into new versions of the multiwii software. So loading
+and parsing config.h files, but specifically comparing different configurations
+and applying changes as well as storing the result in condensed form.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>MultiwiiParser is available here http://code.google.com/p/multiwiiparser/</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>You can also use this location for providing your feedback
+defects and enhancement requests. Since this has been based so far solely on my
+personal needs and only tesing with my own file, please let me know if you find
+any defect.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>So far I have tested the application only on Windows (7), if
+you test it on other platforms, please let me know your experiences.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>References</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal>Information on MultiWii can be found here http://www.multiwii.com/
+     and the correspdong source code is here http://code.google.com/p/multiwii/</li>
+ <li class=MsoNormal>Processing is an open source programming language - http://processing.org/
+     </li>
+ <li class=MsoNormal>ControlP5 is a user interface library for processing by
+     Andreas Schlegel. see http://www.sojamo.de/libraries/controlP5/</li>
+</ul>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h1>License</h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Copyright 2013 by Johannes Viegener</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>MultiWiiParser is free software: you can redistribute it
+and/or modify it under the terms of the Lesser GNU General Public License as
+published by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>MultiWiiParser is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>You should have received a copy of the Lesser GNU General
+Public License along with MultiWiiParser.  If not, see
+&lt;http://www.gnu.org/licenses/&gt;.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<h1>Overview</h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Main screen after fresh start</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><img width=575 height=344
+src="multiwiiparser_files/image001.jpg"></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>On the top level the three tabs that are described in
+subsequent sections can be selected. The active tab is usally show in light
+blue. Or more general active options or buttons are usually shown in light
+blue.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>File tab is used for selecting files and maintaining a
+persistent catalog of favorite files (plus comments).</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The Config Details tab is showing the details of a selected
+config.h file.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The Compare Configurations tab is used for showing two
+configuration files (or their differences) together with information marking
+the deviations.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The Config or Compare tab are only accesible if at least one
+or two (for compare) files are selected in the File tab.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>A config.h file is read and structured with the following
+elements</p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal>Sections are the (currently 7) different sections marked
+     in the config.h file as comments. (e.g. SECTION  1 - BASIC SETUP)</li>
+ <li class=MsoNormal>Subsections are the intermediate structure elements that
+     separate bigger blocks in the respective section. They are marked with
+     three line comments e.g.<br>
+       /********************************************************/<br>
+       /*********          boards and sensor definitions          
+     *************/<br>
+       /********************************************************/<br>
+     Subsections are only used as qualifiers (additional names) for groups.</li>
+ <li class=MsoNormal>Groups are smaller sets of configurations that are
+     separated by comments e.g. <br>
+            /*********    The type of multicopter    *****************/<br>
+     <br>
+ </li>
+ <li class=MsoNormal>Entries are the single configurations (normally a single
+     line in the config.h file). These can be active; meaning not part of a
+     comment:<br>
+            #define MINCOMMAND  1000<br>
+     or inactive (part of a comment, e.g. <br>
+            //#define GIMBAL<br>
+     Beside the name (e.g. GIMBAL or MINCOMMAND), the entries might also have a
+     value (e.g. 1000 for the definition of MINCOMMAND above) or can be self
+     contained (e.g. GIMBAL). Due to the nature of the config.h file all names
+     for ACTIVE entries must be unique.  <br>
+     <br>
+     There are different types of groups of configurations that are also
+     handled specifically in the code</li>
+ <ul style='margin-top:0cm' type=circle>
+  <li class=MsoNormal>Same name - config.h might provide different values for
+      the same entry name (e.g. MINTHROTTLE). Where only one out of these can
+      be active in that group.</li>
+  <li class=MsoNormal>No value - a group of entries might be the exclusive
+      selections. Where only a single one of these should be active although
+      they have different names. (e.g. the type of multicopter is specific can
+      not be both QUADX and TRI).</li>
+  <li class=MsoNormal>Mixed - Might contain subparts of the above. Not
+      specifically checked, just for information tracked.</li>
+ </ul>
+ <li class=MsoNormal>Additional comments, that are not part of the structure
+     (section names, subections etc) are also saved and shown together with the
+     corresponding element in the structure. E.g. line comments after a
+     specific entry in the config file<br>
+            //#define HEX6H  // New Model<br>
+     Here &quot;New Model&quot; is a line comment for the entry<br>
+     <br>
+ </li>
+</ul>
+
+<p class=MsoNormal>Active editor fields that can be used to change an entry (or
+favorite file) together with the buttons to save or cancel the edit are shown
+in red. Change between tabs is blocked when an editor is active.</p>
+
+<h1>File Tab</h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><img width=575 height=344
+src="multiwiiparser_files/image002.jpg"></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The file tab provides information about the currently open
+configurations.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Next to Filename is the main configuration that is used for
+the content of the Config Details tab (and on the left side of the Compare
+tab). All changes and save operations are only changing or using this
+configuration.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Next to compared to is the actual secondary config file
+shown. </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Below both file names are buttons to add the current file to
+the favorites listbox in the lower half of the window, select another file or
+deselect (clear) the current file selection.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The restore file button can be used to restore the last file
+selection.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>In the favorites list the path/filename and an optional
+comment is shown. With the edit button, the comment can be changed. A double
+click (or the &quot;Load favorite&quot; button) will load that file in the next
+available slot (either as primary or secondary file). </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The favorites list (and the last file selection) is stored
+on any change in the app directory as &quot;favorites.txt&quot;.</p>
+
+<h1>Config Details Tab</h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><img width=575 height=344
+src="multiwiiparser_files/image003.jpg"></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The Config Details tab allows the looking through the
+details of a config.h  file. </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Normally the structure (Section/Group) dropdown boxes are
+used to show a small amount of the configurations in the list of entries (lower
+part). The button &quot;Show All&quot; will change to a complete (sorted by
+name and value) list of all entries in the config file. &quot;Only Active&quot;
+is used to restrict the list to show only active entries.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The list contains three different display separate lists</p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal>Name + Value as a specific formatting. e.g. MINTHROTTLE =
+     '1300'<br>
+     Active entries are prefixed with a *</li>
+ <li class=MsoNormal>Options showing the specifics of the entry</li>
+ <ul style='margin-top:0cm' type=circle>
+  <li class=MsoNormal>ACT - Showing if the entry is active </li>
+  <li class=MsoNormal>EE - If the entry is stored in EEPROM of the
+      microcontroller (see comments in config.h)</li>
+  <li class=MsoNormal>VAL - if the entry has a value assigned</li>
+  <li class=MsoNormal>// - if the entry has a line comment</li>
+ </ul>
+ <li class=MsoNormal>Line comment for the entry</li>
+</ul>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Above the list the type of group is shown</p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal>No Value - If all the entries in the group have no value </li>
+ <li class=MsoNormal>=Name - If all the entries in the group (must) have the
+     same name and therefore only a single entry can be active</li>
+</ul>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Below the list the editor fields show the complete entry in
+separate fields. The fields are also used when changing an entry, plus the
+button Active. Only the fields that are currently changable will be editable. </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Buttons are also available for creating a new entry in the
+current group or deleting an entry.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Additionally there are two buttons for writing the
+configuration to a file</p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal>Write - Write a full configuration into a file (default
+     same filename as currently opened)</li>
+ <li class=MsoNormal>Minimal - Write only the active entries together with Sections
+     into a file. This format is best for storing version independant only the
+     most relevant configs</li>
+</ul>
+
+<p class=MsoNormal>These buttons are marked red if unsaved changes exist for
+the current configuration</p>
+
+<h1>Compare Configurations</h1>
+
+<p class=MsoNormal><img width=575 height=344
+src="multiwiiparser_files/image004.jpg"></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The Compare Configurations Tab is showing two different
+configurations side-by-side. On the left side the primary config file is shown
+and the other file on the right. All entries are compared by name (plus value).
+If no entry with the same name is existing an entry with &quot;--&quot; is
+shown instead. </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>In the middle column a status of the comparision is shown</p>
+
+<ul style='margin-top:0cm' type=disc>
+ <li class=MsoNormal>= : Entries are equal</li>
+ <li class=MsoNormal>++ : Entry is not existing on the left side (primary file)</li>
+ <li class=MsoNormal>-- : Entry is not existing on the right side</li>
+ <li class=MsoNormal>+A : Entry is activated in the right side (and deactive on
+     the other side)</li>
+ <li class=MsoNormal>-A : Entry is activated in the left side (and deactive on
+     the other side)</li>
+ <li class=MsoNormal>!V : Values not equal</li>
+</ul>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>On the top, buttons are there for restricting the display in
+the lists to only active entries or only different entries.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Below the detail fields buttons are given to align the
+differences in the entries. Activating/Deactivating the entry on the left side;
+Adding or removing the entry on the left side; Align (value or all parts). </p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>Additionally there are the same buttons to store the primary
+configuration file.</p>
+
+</div>
+
+</body>
+
+</html>

@@ -69,9 +69,6 @@ public void updateCompConfig(Config aConfig) {
 
   G_SelectedId = 0;
   
-  // ?? Set Labels with filenames (for both configs)
-
-
   // fill section dropdowns
   isUpdateEnabled = false;
   drpLCSection.addItems( g_config.getDisplayNames() );

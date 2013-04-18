@@ -37,8 +37,18 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.util.Map; 
 import java.util.HashMap; 
 
+import processing.core.PApplet;
 import processing.event.KeyEvent; 
 
+/*************************************************************************************************/
+public static final int KEY_HOME = 36;
+public static final int KEY_END = 35;
+
+public static final int KEY_PAGEUP = 33;
+public static final int KEY_PAGEDN = 34;
+  
+
+/*************************************************************************************************/
 Object getFromClipboard(DataFlavor flavor)
 {
   Clipboard clipboard = getToolkit().getSystemClipboard();
@@ -397,4 +407,61 @@ public class SelectListBox extends ListBox {
     return super.addItem( modifName, theValue );
   } 
 
+  /**
+   * Adding key support. up and down arrows can be used to scroll listbox or dropdownList,up and
+   * down, use shift+up/down for faster scrolling, use alt+up/down to jump to the top or bottom.
+   * 
+   * @exclude {@inheritDoc}
+   */
+  public void keyEvent(final KeyEvent theEvent) {
+    super.keyEvent(theEvent);
+    float x = getAbsolutePosition().x;
+    float y = getAbsolutePosition().y;
+    boolean b = true;
+//    boolean b = (getWindow().mouseX > x && getWindow().mouseX < (x + _myWidth) && getWindow().mouseY > (y - getBarHeight()) && getWindow().mouseY < y + _myOriginalBackgroundHeight);
+    if (b && isOpen()) {
+      float step = (1.0f / (float) items.size());
+      if (cp5.isShiftDown()) {
+        println("Shift");
+        step *= 10;
+      }
+      else if (cp5.isAltDown()) {
+        println("Alt");
+        step = 1;
+      }
+      if (theEvent.getAction() == KeyEvent.PRESS) {
+        switch (theEvent.getKeyCode()) {
+        case (PApplet.UP):
+          _myScrollbar.setValue(PApplet.constrain(_myScrollbar.getValue() + step, 0, 1));
+          break;
+        case (PApplet.DOWN):
+          _myScrollbar.setValue(PApplet.constrain(_myScrollbar.getValue() - step, 0, 1));
+          break;
+        case (KEY_PAGEUP):  // Page up
+          step *= 10;
+          _myScrollbar.setValue(PApplet.constrain(_myScrollbar.getValue() + step, 0, 1));
+          break;
+        case (KEY_PAGEDN):  // Page down
+          step *= 10;
+          _myScrollbar.setValue(PApplet.constrain(_myScrollbar.getValue() - step, 0, 1));
+          break;
+        case (KEY_HOME):  
+          step = 1;
+          if (cp5.isShiftDown()) {
+            _myScrollbar.setValue(PApplet.constrain(_myScrollbar.getValue() + step, 0, 1));
+          }
+          break;
+        case (KEY_END):  
+          step = 1;
+          if (cp5.isShiftDown()) {
+            _myScrollbar.setValue(PApplet.constrain(_myScrollbar.getValue() - step, 0, 1));
+          }
+          break;
+ //       default:
+ //         println("Keycode " + theEvent.getKeyCode());
+
+        }
+      }
+    }
+  }
 }
